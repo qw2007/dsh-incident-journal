@@ -1,0 +1,24 @@
+dsh-incident-journal
+Copyright (c) 2026 qw2007
+
+This product includes software developed by third parties.
+
+-------------------------------------------------------------------------------
+lib/index.js — skill provider shim
+-------------------------------------------------------------------------------
+Adapted from dsh-ponytail-skills, which in turn adapted it from the DeepSeek
+Harness filesystem skill provider.
+
+  dsh-ponytail-skills  https://github.com/gongyijie85/dsh-ponytail
+    Copyright (c) 2026 gongyijie85 (DSH port)
+  ponytail (original skills)  https://github.com/DietrichGebert/ponytail
+    Copyright (c) 2026 DietrichGebert
+
+Licensed under the MIT License. The full text is in LICENSE, and the upstream
+copyright notices are also reproduced in the source file header.
+
+-------------------------------------------------------------------------------
+Everything else
+-------------------------------------------------------------------------------
+skills/, README.md, README.en.md, CHANGELOG.md, scripts/, and the package
+metadata are original work by qw2007, MIT licensed.
