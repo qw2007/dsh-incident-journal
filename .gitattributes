@@ -1,0 +1,22 @@
+# Normalise every text file to LF in the repository and in checkouts.
+# This package ships shell snippets (.sh in READMEs) and is developed on
+# Windows while deployed on Linux; CRLF checkouts break `/bin/sh` shebangs
+# with "bad interpreter: No such file or directory".
+* text=auto eol=lf
+
+# Windows-only script formats keep CRLF so cmd.exe can read them.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary formats must never be touched.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.tgz binary

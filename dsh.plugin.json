@@ -1,0 +1,18 @@
+{
+  "id": "qw2007/dsh-incident-journal",
+  "name": "Incident Journal",
+  "version": "0.1.0",
+  "description": "Capture, quiz, and audit your own engineering incidents.",
+  "main": "./lib/index.js",
+  "engines": {
+    "dsh": ">=0.1.0-rc.6"
+  },
+  "contributes": {
+    "tools": [],
+    "skills": [
+      "incident-journal",
+      "incident-review",
+      "incident-audit"
+    ]
+  }
+}

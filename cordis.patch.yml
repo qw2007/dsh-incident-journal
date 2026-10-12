@@ -1,0 +1,6 @@
+# Mount the incident-journal skill provider as a Harness plugin row.
+#
+# `name` resolves the package (this package); `id` is the loader row id.
+- insert:
+    - id: dsh-incident-journal
+      name: 'dsh-incident-journal'
