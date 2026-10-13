@@ -4,8 +4,8 @@ description: >
   Use when the user wants to start, stop, or flush their engineering journal —
   开始记录 / 停止记录 / 落盘 — or when something worth keeping just happened: a
   belief that was disproven, a technique worth remembering, or a design stance
-  and the constraints that make it right. 当你发现「我原来是 X，实测是 Y」、
-  或遇到值得记下的技术点 / 思想风格时使用。
+  and the constraints that make it right. 当你发现「我原来以为是 X，实测是 Y」、
+  或遇到值得记下的技术点 / 思想风格、 或想开始 / 停止 / 落盘时使用。
 ---
 
 # incident-journal
