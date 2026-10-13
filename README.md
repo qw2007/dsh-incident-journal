@@ -86,16 +86,21 @@ node scripts/verify-provider.mjs
 库的目录结构是**固定的**：
 
 ```bash
-mkdir -p my-journal/资料 my-journal/my-project/{坑,技术点,思想风格}
+mkdir -p my-journal/资料 my-journal/{技术点,思想风格} my-journal/my-project/坑
 ```
 
 ```
 my-journal/
   资料/                        外部参考资料（面经、文档）
+  技术点/                      跨项目共享 —— 跟人走
+  思想风格/                    跨项目共享 —— 跟人走
   my-project/
-    坑/  技术点/  思想风格/
+    README.md                  该项目的条目清单（只存链接，不存内容）
+    坑/                        只属于这个项目
   README.md   career.log   REVIEW.md
 ```
+
+**`坑` 跟项目走，`技术点` / `思想风格` 跟人走。** 后两类不属于任何一个项目，所以放在一级目录，靠条目里的 `projects:` 标签关联项目 —— 那是条目与项目之间唯一的关联。`<项目名>/README.md` 只存链接，让你进到项目目录就能看全三类；它不复制内容，所以不会出现「指针和正文不一致」。这个文件由写条目那一步顺带更新。
 
 没有可配的路径 —— 布局固定，所以**没有配置文件**。跟 Agent 说「**开始记录**」，它会问一次库的绝对路径（**只问这一次**），写进 `~/.dsh/incident-journal.yml`：
 
@@ -115,11 +120,23 @@ active_workspaces:
 
 1. 检查开关状态；
 2. 按三类各自的反事实筛子判断够不够格；
-3. 拿关键词 grep 一遍 `资料/`，命中就加一节 `## 与资料的关联`；
-4. 按 [`skills/incident-journal/references/skeleton.md`](skills/incident-journal/references/skeleton.md) 的骨架落一条；
-5. 同步三处索引（条目 / `README.md` 主题索引 / `career.log` 时间线）。
+3. **先 grep 库查重** —— 命中、且这次的新判断是原条目没顾到的，就**加厚**它，不新建；
+4. 拿关键词 grep 一遍 `资料/`，命中就加一节 `## 与资料的关联`；
+5. 按 [`skills/incident-journal/references/skeleton.md`](skills/incident-journal/references/skeleton.md) 的骨架落一条；
+6. 同步**四处**索引（根 `README.md` / `career.log` / `REVIEW.md` / `<项目名>/README.md`）。
 
 **库在工作区之外时**，条目先写到 `<工作区>/.incident-journal-staging/`，你说「**落盘**」时批量搬过去 —— 一次授权，而不是每个文件一次。
+
+**加厚最容易失效，所以它被写成了一个硬动作。** 不先 grep，你就只有想起来「我记过」的时候才会去加厚 —— 而想得起来的时候，你本来就不需要这条规则。
+
+| 情况 | 动作 |
+|---|---|
+| 同主题条目已有，新判断是它没顾到的 | **加厚**：补进对应那一节、补 `projects:`，不新建文件 |
+| 同主题条目已有，它已经答上了 | 什么都不做 |
+| 新点自己是完整的另一个反事实 | **新建** |
+| `坑` | **从不加厚** —— 坑绑在一个项目的代码位置上 |
+
+边界：补到**需要改标题**就该新建，那已经不是原来那件事了。`坑` 在三个以上项目反复出现就不再是坑，`incident-audit` 会提示把它提成一条技术点或思想风格。
 
 ### 3. 复习
 
@@ -141,9 +158,11 @@ active_workspaces:
 
 ```
 [断链]   career.log:18 引用 of-0007，但没有任何条目定义它
+[悬空]   项目视图 my-project/README.md 指向 技术点/xxx.md，该文件不存在
 [流水账] 坑/foo.md 缺「我原来以为」；技术点/bar.md 说不出不用会怎样
 [污染]   技术点/baz.md 把 [资料] 写成了事实
 [退化]   坑/qux.md 只写了行号没写符号名
+[提升]   坑/jwt-expiry-a.md、坑/jwt-expiry-b.md 分属两个项目、同一判据 → 建议提成一条 技术点
 [失衡]   库里有 9 条坑、0 条技术点、0 条思想风格
 [缺记]   commit abc1234 (revert: ...) 没有对应条目
 ```

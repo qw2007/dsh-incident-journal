@@ -84,16 +84,21 @@ It drives `list()` / `get()` and verifies every `references/...` path mentioned 
 The layout is **fixed**:
 
 ```bash
-mkdir -p my-journal/资料 my-journal/my-project/{坑,技术点,思想风格}
+mkdir -p my-journal/资料 my-journal/{技术点,思想风格} my-journal/my-project/坑
 ```
 
 ```
 my-journal/
   资料/                        external reference material (interview notes, docs)
+  技术点/                      shared across projects — travels with you
+  思想风格/                    shared across projects — travels with you
   my-project/
-    坑/  技术点/  思想风格/
+    README.md                  that project's entry list (links only, no content)
+    坑/                        belongs to this project alone
   README.md   career.log   REVIEW.md
 ```
+
+**`坑` travels with the project; `技术点` and `思想风格` travel with you.** The latter two belong to no single project, so they sit at the root and are tied back by the `projects:` line in each entry — that line is the only link between an entry and a project. `<project>/README.md` holds links only, so opening a project shows all three kinds at once without duplicating anything: there is no pointer to fall out of sync with the content. The write step keeps it updated.
 
 There are no configurable paths — so **there is no config file**. Ask the agent to "start recording"; it asks once for the absolute library path (**once, ever**) and writes `~/.dsh/incident-journal.yml`:
 
@@ -113,11 +118,23 @@ Ask the agent to record what you just hit. It:
 
 1. checks the switch;
 2. applies the per-kind counterfactual filter;
-3. greps the entry's keywords against `资料/`, adding a `## 与资料的关联` section on a hit;
-4. writes the entry following [`skills/incident-journal/references/skeleton.md`](skills/incident-journal/references/skeleton.md);
-5. syncs all three indexes (entries / the `README.md` topic index / the `career.log` timeline).
+3. **greps the library for a duplicate first** — on a match, if the new judgement exposes something the existing entry did not account for, it **thickens** that entry instead of creating a new one;
+4. greps the entry's keywords against `资料/`, adding a `## 与资料的关联` section on a hit;
+5. writes the entry following [`skills/incident-journal/references/skeleton.md`](skills/incident-journal/references/skeleton.md);
+6. syncs **four** indexes (root `README.md` / `career.log` / `REVIEW.md` / `<project>/README.md`).
 
 **When the library lives outside the workspace**, entries land in `<workspace>/.incident-journal-staging/` and are flushed in one batch when you say "**落盘**" — one approval instead of one per file.
+
+**Thickening is the rule most likely to quietly do nothing, so it is written as a hard action.** Without the grep you would only thicken when you happen to remember the earlier entry — and by then you no longer need the rule.
+
+| Situation | Action |
+|---|---|
+| A matching entry exists and the new judgement exposes something it missed | **Thicken** — add it to the right section, update `projects:`, create no file |
+| A matching entry exists and it already covers the point | Do nothing |
+| The new point is a complete counterfactual of its own | **Create a new entry** |
+| `坑` | **Never thickens** — it is bound to one project's code location |
+
+Boundary: once thickening would require **changing the title**, it is no longer the same thing — create a new entry. A `坑` recurring across three or more projects has stopped being a `坑`, and the audit will propose promoting it into a single `技术点` or `思想风格`.
 
 ### 3. Review
 
@@ -139,9 +156,11 @@ Ask for an audit. One line per finding, sorted by severity:
 
 ```
 [broken]  career.log:18 cites of-0007, but no entry defines it
+[dangling] project view my-project/README.md points at 技术点/xxx.md, which does not exist
 [log]     坑/foo.md has no "what I believed"; 技术点/bar.md cannot say what goes wrong without it
 [pollute] 技术点/baz.md writes a [资料] claim as fact
 [stale]   坑/qux.md gives a line number but no symbol name
+[promote] 坑/jwt-expiry-a.md and 坑/jwt-expiry-b.md sit in two projects under one criterion → promote to a single 技术点
 [skew]    9 entries in 坑, 0 in 技术点, 0 in 思想风格
 [missed]  commit abc1234 (revert: ...) has no entry
 ```

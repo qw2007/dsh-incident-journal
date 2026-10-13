@@ -19,10 +19,29 @@ Three kinds of entry, an explicit on/off switch, and a fixed journal layout.
   **an entry must state its counterfactual:** what I believed (坑), what I
   would have done without it (技术点), under what constraints it holds
   (思想风格). No counterfactual means it is a quotation, not an entry.
-- **The journal layout is fixed:** `<root>/资料/`,
-  `<root>/<project>/{坑,技术点,思想风格}/`, and `README.md` / `career.log` /
-  `REVIEW.md` at the root. The optional `<root>/.incident-journal.yml` is gone —
-  the paths it configured are no longer configurable.
+- **The journal layout is fixed and split by kind:** `<root>/资料/`; `坑` under
+  `<root>/<project>/坑/` because it is bound to one project's code;
+  `技术点/` and `思想风格/` at the **root**, shared across projects and tied
+  back by a `projects:` line in each entry; `README.md` / `career.log` /
+  `REVIEW.md` at the root, plus a link-only `<root>/<project>/README.md` as that
+  project's view. `坑` travels with the project, the other two travel with you.
+  The optional `<root>/.incident-journal.yml` is gone — the paths it configured
+  are no longer configurable.
+- **Thickening is now a rule with a mechanism.** Before writing, grep the
+  library for a matching entry; if one exists and the new judgement exposes
+  something it did not account for, add it to that entry instead of creating a
+  second file. The boundary: once it would require changing the title, it is a
+  different thing — create a new entry. `坑` never thickens, because it is bound
+  to one project's code location; the same `坑` recurring across three or more
+  projects is what `incident-audit` promotes into a single `技术点` /
+  `思想风格`.
+- **Source locations are clues, not links.** The library and the code live in
+  separate repositories, so line numbers drift and symbol names disappear —
+  that is normal, not rot. `repo` / `commit` are required when the two are
+  separate; write "未知" tagged `[推算]` rather than invent a plausible-looking
+  sha.
+- **`incident-journal` writes four indexes** now: the root `README.md`,
+  `career.log`, `REVIEW.md`, and the project's own `<project>/README.md`.
 - **The library is located through `~/.dsh/incident-journal.yml`**
   (`journal_root` + `active_workspaces`) instead of by walking up for a marker
   file.
