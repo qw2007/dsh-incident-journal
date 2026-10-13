@@ -34,9 +34,9 @@ description: >
 
 ```yaml
 # ~/.dsh/incident-journal.yml
-journal_root: D:\DSh\offer
+journal_root: <absolute path to your journal>    # e.g. D:\notes\offer  or  /home/you/offer
 active_workspaces:
-  - D:\DSh\work-AS-team
+  - <absolute path to a workspace>        # e.g. D:\work\my-app  or  /home/you/my-app
 ```
 
 ## 第二步：确认够格
