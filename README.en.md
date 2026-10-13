@@ -1,6 +1,6 @@
 # dsh-incident-journal
 
-> An **engineering incident journal** for the DeepSeek Harness: write down the mistakes you actually made, in a form you will re-read and get quizzed on — instead of letting them rot in a chat log.
+> An **engineering journal** for the DeepSeek Harness: write down the mistakes you actually made, the techniques worth keeping, and the design stances you committed to — in a form you will re-read and get quizzed on, instead of letting them rot in a chat log.
 
 Three skills: **journal** (`incident-journal`), **review** (`incident-review`), **audit** (`incident-audit`).
 
@@ -8,15 +8,21 @@ Three skills: **journal** (`incident-journal`), **review** (`incident-review`), 
 
 ## The problem
 
-Most "lessons learned" notes die of two things:
+Most "lessons learned" notes die of three things:
 
 1. **They are logs, not lessons.** They record what you did, never *what you believed*. Three months later there is nothing to learn from.
 2. **They are never re-read.** A hundred entries, zero reviews. Notes you never revisit are notes you never wrote.
+3. **They only hold mistakes.** A technique worth keeping, or a design stance you committed to, has nowhere to go — so it drains away.
 
-Two mechanisms block both:
+The third is solved by **typing the entries**; the first two by one rule:
 
-- **A mandatory "what I believed" section, with a reason.** The valuable story is not "I fixed X" — it is "I believed X, measured Y, so I changed to Z." **An entry with no wrong belief is not accepted.**
-- **A `status` field plus a quiz skill.** Every entry is `mastered` / `needs review` / `seen once`, and review targets whatever you are most likely to have forgotten.
+| kind | holds | hard filter (the counterfactual) |
+|---|---|---|
+| `坑` | a belief that was overturned | **what I believed**, and why |
+| `技术点` | a technique worth keeping | **what I would have done without it**, and why that is wrong |
+| `思想风格` | a design stance | **under what constraints** it holds, and what breaks it |
+
+**Every entry must be able to state its counterfactual.** If it cannot, it is not accepted — "today I learned Redis" cannot say what goes wrong without it, and "they used a layered architecture" cannot say when that stops being right. **An entry with no counterfactual is a quotation, not an entry.**
 
 Plus a **transferability** bar: if a lesson only applies to that one error message, it does not belong here.
 
@@ -26,9 +32,9 @@ Plus a **transferability** bar: if a lesson only applies to that one error messa
 
 | skill | fires when | does |
 |---|---|---|
-| `incident-journal` | you just finished debugging something | writes an entry from a fixed skeleton, syncs all three indexes |
-| `incident-review` | "quiz me" | picks 5–8 entries, prioritising what you are most likely to have forgotten |
-| `incident-audit` | "audit my journal" | scans for rot: broken indexes, log-shaped entries, stale numbers, repeated patterns, incidents never written down |
+| `incident-journal` | "start recording" / "stop recording" / "flush", or something worth keeping just happened | checks the switch, judges whether it qualifies, writes the entry and syncs all three indexes |
+| `incident-review` | "quiz me" | picks 5–8 entries, questions each kind differently, prioritising what you are most likely to have forgotten |
+| `incident-audit` | "audit my journal" | scans for rot: broken indexes, missing counterfactuals, `[资料]` written as fact, unverifiable locations, three-kind imbalance, incidents never recorded |
 
 ---
 
@@ -73,44 +79,70 @@ It drives `list()` / `get()` and verifies every `references/...` path mentioned 
 
 ## Usage
 
-### 1. Create a journal
+### 1. Create the library, point at it, start
+
+The layout is **fixed**:
 
 ```bash
-mkdir -p my-journal/topics my-journal/measurements
+mkdir -p my-journal/资料 my-journal/my-project/{坑,技术点,思想风格}
 ```
 
-Optional config at the journal root, `.incident-journal.yml`:
+```
+my-journal/
+  资料/                        external reference material (interview notes, docs)
+  my-project/
+    坑/  技术点/  思想风格/
+  README.md   career.log   REVIEW.md
+```
+
+There are no configurable paths — so **there is no config file**. Ask the agent to "start recording"; it asks once for the absolute library path (**once, ever**) and writes `~/.dsh/incident-journal.yml`:
 
 ```yaml
-entries: topics/          # entry directory
-index: README.md          # topic index
-timeline: career.log      # one line per event
-review: REVIEW.md         # quiz questions
+journal_root: /abs/path/to/my-journal
+active_workspaces:
+  - /abs/path/to/the/project/you/work/in
 ```
 
-Omit the file and those are the defaults.
+After that you say "start recording" once per workspace, and that workspace keeps recording until you say "**stop recording**" — across sessions.
+
+> **While it is not started, nothing is recorded** — but not silently: if a moment would have qualified, the agent says one line, 「（journal 未启动，这次没记）」. No such line means nothing qualifying actually happened.
 
 ### 2. Write an entry
 
-Ask the agent to record what you just hit. It locates the journal root, writes an entry following [`skills/incident-journal/references/skeleton.md`](skills/incident-journal/references/skeleton.md), and syncs the three indexes.
+Ask the agent to record what you just hit. It:
 
-The skeleton: **symptom** / **what I believed** / **actual cause** / **how I located it** / **fix** / **numeric evidence** / **the 30-second version** / **what a follow-up question would ask**.
+1. checks the switch;
+2. applies the per-kind counterfactual filter;
+3. greps the entry's keywords against `资料/`, adding a `## 与资料的关联` section on a hit;
+4. writes the entry following [`skills/incident-journal/references/skeleton.md`](skills/incident-journal/references/skeleton.md);
+5. syncs all three indexes (entries / the `README.md` topic index / the `career.log` timeline).
+
+**When the library lives outside the workspace**, entries land in `<workspace>/.incident-journal-staging/` and are flushed in one batch when you say "**落盘**" — one approval instead of one per file.
 
 ### 3. Review
 
-Ask to be quizzed. 5–8 questions, answers folded behind `<details>`, appended to `REVIEW.md` with continuing numbers.
+Ask to be quizzed. 5–8 questions, each kind quizzed differently:
+
+| kind | what gets tested |
+|---|---|
+| `坑` | what made you confident in the wrong inference |
+| `技术点` | what you would have done without it, and how that breaks |
+| `思想风格` | what extra condition would make the conclusion false |
+
+Answers fold behind `<details>`, and the round is appended to `REVIEW.md` with continuing numbers.
 
 **Entries you get wrong earn a new line in their "follow-up questions" section** — a wrong answer means the note is missing an angle, not that your memory failed.
 
 ### 4. Audit
 
-Ask for an audit. Output is one line per finding, sorted by severity:
+Ask for an audit. One line per finding, sorted by severity:
 
 ```
 [broken]  career.log:18 cites of-0007, but no entry defines it
-[log]     topics/foo.md has no "what I believed" section
-[stale]   topics/bar.md marks [measured] with no evidence
-[repeat]  a.md / b.md / c.md share one rule → merge them
+[log]     坑/foo.md has no "what I believed"; 技术点/bar.md cannot say what goes wrong without it
+[pollute] 技术点/baz.md writes a [资料] claim as fact
+[stale]   坑/qux.md gives a line number but no symbol name
+[skew]    9 entries in 坑, 0 in 技术点, 0 in 思想风格
 [missed]  commit abc1234 (revert: ...) has no entry
 ```
 
@@ -118,21 +150,32 @@ Ask for an audit. Output is one line per finding, sorted by severity:
 
 ## What qualifies
 
-Any **one** of these is enough:
+**Each kind has its own hard filter.** Full rules: [`skills/incident-journal/references/qualifying.md`](skills/incident-journal/references/qualifying.md).
 
-1. **A wrong belief was overturned** — wrong for a good reason, not a typo.
-2. **There are checkable numbers** — command output, timings, memory, cost.
-3. **It cost something** — money, data, or time if ignored.
-4. **It transfers** — idempotency, replay vs side effects, container memory, event-store choice.
+- **`坑` — "I believed A, because B."** B must exist. The test: would the you of that moment have drawn the same wrong inference from that evidence? If yes, it qualifies.
+- **`技术点` — "without it I would have done X, which is wrong."** There must be a concrete alternative you would actually have taken, and it must genuinely be worse.
+- **`思想风格` — "it holds under these constraints, and fails when..."** Preference with no constraint does not qualify.
 
-**Explicitly rejected:** syntax errors, environment chores, standard practice copied from the internet, "best practices" with no numbers.
+Shared by all three: checkable evidence, a real cost, and transferability.
 
-Full rules: [`skills/incident-journal/references/qualifying.md`](skills/incident-journal/references/qualifying.md).
+**Explicitly rejected:** syntax errors, environment chores, standard practice copied from the internet, "best practices" with no numbers, design taste with no constraint.
 
-### Two honesty rules
+### Three honesty rules
 
-- Numbers must be tagged `[measured]` or `[estimated]`. **`[estimated]` is allowed; untagged is not.**
-- The symptom section **quotes the error verbatim** — paraphrasing throws away the word that later turns out to matter.
+- Every number is tagged `[实测]` / `[推算]` / `[资料]`. **Untagged is not trusted.**
+- `[资料]` must never be written as fact. Reference material is second-hand and may be wrong or stale — the form is "the source says X", not "X". **A wrong claim with a citation is more believable than one without, so the pollution here is worse.**
+- The "what it is" section **quotes the error verbatim** — paraphrasing throws away the word that later turns out to matter.
+
+---
+
+## What an entry looks like
+
+[`skills/incident-journal/references/examples/`](skills/incident-journal/references/examples/) has two real, redacted entries (both `坑`):
+
+- [`misleading-error-message.md`](skills/incident-journal/references/examples/misleading-error-message.md) — an error message whose nouns name an *implementation detail*, not the business concept
+- [`sentinel-value-folded-semantics.md`](skills/incident-journal/references/examples/sentinel-value-folded-semantics.md) — a field that folds several meanings into one value cannot be used for decisions
+
+Both write "无" under `## 源码位置`: one is machine-level git config, the other a throwaway script plus an external API. **When there is no project code, do not invent a location** — faking one to fill the cell is far worse than leaving it empty.
 
 ---
 
@@ -140,13 +183,23 @@ Full rules: [`skills/incident-journal/references/qualifying.md`](skills/incident
 
 **Why a skill and not a plugin for the automation.**
 
-The hard part of this library is entirely judgement: what counts as an overturned belief, whether a lesson transfers. That cannot be automated. Only the final `git add/commit/push` can.
+The hard part of this library is entirely judgement: what counts as a real counterfactual, whether a lesson transfers. That cannot be automated. Only the final `git add/commit/push` can.
 
 Wrapping that in a plugin costs peer-dependency ranges, a build, a pack step, a profile install, and a restart — for zero added judgement. A skill keeps the trigger where it belongs: a human deciding whether this moment is worth recording.
 
 (`lib/index.js` exists so the library can be **distributed** to other machines as a plugin. If you take Option A you never touch it.)
 
+**Why all three kinds need a counterfactual.**
+
+The counterfactual is the only thing standing between this and a log. Once entries were split into three kinds, the old rule — "must have a `wrong_belief`" — stopped covering two of them. Without an equally hard filter per kind, `技术点` turns into a bookmarks folder within three months.
+
 **Why `status` is human-edited.** Getting a quiz question right once is not mastery.
+
+**Why the layout is fixed.**
+
+It used to be four configurable keys (`entries` / `index` / `timeline` / `review`). Since there is no second legal layout, that config was just the same defaults table copied into three skill bodies — so it was deleted, and with it a place for the three to drift apart.
+
+---
 
 ## Compatibility
 

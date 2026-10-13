@@ -1,10 +1,8 @@
 # 一句「没有可用的凭据」，把你引向去登录账号
 
-`status: 需复习`
+`kind: 坑` · `status: 需复习` · `of-0001`
 
-`of-0001`
-
-## 现象
+## 是什么
 
 本机所有 HTTPS 请求失败，看起来像断网：
 
@@ -69,6 +67,10 @@ git -c http.sslBackend=openssl ls-remote https://github.com/octocat/Hello-World.
 撤销就是把 `openssl` 改回 `schannel`。
 
 **受影响范围**：走 OpenSSL 的工具恢复（`git`、Python、Node、Go）；**schannel 系的仍然坏**（PowerShell 的 `Invoke-WebRequest` / `Invoke-RestMethod`、基于 .NET 的程序）——它们改用 `curl.exe` 或 Python 绕开。
+
+## 源码位置
+
+无 —— 问题在机器级 git 配置（`~/.gitconfig` 的 `http.sslbackend`），不在任何项目代码里。
 
 ## 数字证据
 

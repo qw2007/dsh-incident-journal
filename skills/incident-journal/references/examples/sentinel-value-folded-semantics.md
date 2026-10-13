@@ -1,10 +1,8 @@
 # 把「查不到」编码成一个合法值的字段，不能用来做决策
 
-`status: 需复习`
+`kind: 坑` · `status: 需复习` · `of-0002`
 
-`of-0002`
-
-## 现象
+## 是什么
 
 用 `IndexOf` 在文件里找一行锚点，然后在它后面插一行新内容。结果**新行跑到了文件开头，而且没有任何报错**。
 
@@ -69,6 +67,11 @@ $text = $text.Insert($idx + $newLine.Length, $newLine)
 # 2. 枚举字段出现哨兵值时，回去看原始数据
 gh api repos/<owner>/<repo>/license -H "Accept: application/vnd.github.raw"
 ```
+
+## 源码位置
+
+无 —— 两个实例分别发生在一次性 PowerShell 脚本和 `gh api` 调用上，还没进项目代码。
+（进项目代码之后，这里要写成 `repo @ commit · path:符号名`。**不要为了填格子编一个位置。**）
 
 ## 数字证据
 
