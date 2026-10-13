@@ -67,6 +67,13 @@ Three kinds of entry, an explicit on/off switch, and a fixed journal layout.
 - `incident-audit` grows from five checks to eight, adding: missing
   counterfactual per kind, `[资料]` written as fact, unverifiable source
   locations, and three-kind imbalance.
+- **`of-NNNN` numbers must be declared inside the entry file** — on the
+  identity line (`kind · of-0007 · status`) for a one-instance file, or as a
+  `## of-NNNN` heading for a multi-instance one. An index that cites a number no
+  file declares is a dangling reference; `incident-audit` check 1 now resolves
+  numbers against both positions and reports `[断链]`. Single-instance files are
+  the ones that break silently: their H2s are taken by the semantic sections, so
+  the number only ever exists in the index.
 
 ### Fixed
 
