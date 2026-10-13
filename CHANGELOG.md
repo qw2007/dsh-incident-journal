@@ -49,6 +49,17 @@ Three kinds of entry, an explicit on/off switch, and a fixed journal layout.
   counterfactual per kind, `[资料]` written as fact, unverifiable source
   locations, and three-kind imbalance.
 
+### Fixed
+
+- `incident-journal` vanished from the skill catalog after the 0.2.0
+  description rewrite. The frontmatter kept a plain single-line scalar and the
+  new wording contained `just happened: a belief ...`; the host reads
+  frontmatter with a real YAML parser, which treats `": "` inside a plain
+  scalar as a nested mapping, so parsing failed and the host dropped the skill
+  **with no error**. All three descriptions now use folded blocks
+  (`description: >`), and `verify-provider.mjs` gained a check for YAML-unsafe
+  plain scalars so the next one fails loudly instead of disappearing.
+
 ## [0.1.0] — 2026-10-12
 
 First public cut. Three skills and the provider shim that distributes them.

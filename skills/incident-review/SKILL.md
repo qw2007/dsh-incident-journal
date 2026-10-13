@@ -1,6 +1,9 @@
 ---
 name: incident-review
-description: Use when the user wants to be quizzed on their own incident journal — 复习、考考我、抽查、quiz me、test me — to turn written-but-unreviewed entries into tested recall. Pairs with the incident-journal skill.
+description: >
+  Use when the user wants to be quizzed on their own incident journal — 复习、
+  考考我、抽查、quiz me、test me — to turn written-but-unreviewed entries into
+  tested recall. Pairs with the incident-journal skill.
 ---
 
 # incident-review

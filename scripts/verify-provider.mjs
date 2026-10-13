@@ -3,8 +3,9 @@
 //
 // Drives lib/index.js the same way the DSH skill registry does — list() then
 // get() — and additionally checks the things the registry does not: that every
-// relative reference inside a SKILL.md resolves on disk, and that
-// dsh.plugin.json advertises exactly the skills the provider discovers.
+// relative reference inside a SKILL.md resolves on disk, that dsh.plugin.json
+// advertises exactly the skills the provider discovers, and that each
+// frontmatter block survives a real YAML parser.
 //
 // Run: node scripts/verify-provider.mjs
 import { readFile, access } from 'node:fs/promises'
@@ -111,12 +112,47 @@ check(
 )
 check(manifest.main === './lib/index.js', `dsh.plugin.json main is "${manifest.main}"`)
 
+// --- 6. Frontmatter must survive a real YAML parser --------------------------
+// The host reads SKILL.md frontmatter with the `yaml` package, NOT with the
+// tolerant line parser in lib/index.js. An unquoted plain scalar containing
+// ": " (or " #") parses as a nested mapping; the host's parse then fails and
+// the skill is dropped from the catalog with no error, while the shim here
+// still accepts it. That mismatch is how this bug ships — so check it here.
+// Any description that needs a colon goes in a folded block: `description: >`.
+for (const candidate of candidates) {
+  const label = candidate.name
+  const text = await readFile(candidate.path, 'utf8')
+  const block = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text)
+  if (!check(block !== null, `${label}: no YAML frontmatter block`)) continue
+  for (const [index, raw] of block[1].split('\n').entries()) {
+    if (/^[ \t]/.test(raw)) continue // block-scalar continuation line
+    const match = /^([A-Za-z][\w-]*):[ \t]*(.*)$/.exec(raw.trimEnd())
+    if (match === null) continue
+    const key = match[1]
+    const value = match[2].trim()
+    if (value === '' || value.startsWith('>') || value.startsWith('|')) continue
+    if (value.startsWith('"') || value.startsWith("'")) continue
+    const line = index + 2 // block[1] starts on file line 2
+    check(
+      !/:[ \t]/.test(value),
+      `${label}: frontmatter "${key}" (line ${line}) is an unquoted scalar containing ": " — ` +
+        `a real YAML parser reads that as a nested mapping and the host silently drops this ` +
+        `skill. Use a folded block: "${key}: >".`
+    )
+    check(
+      !/[ \t]#/.test(value),
+      `${label}: frontmatter "${key}" (line ${line}) is an unquoted scalar containing " #" — ` +
+        `quote it or use a folded block: "${key}: >".`
+    )
+  }
+}
+
 report()
 
 function report() {
   for (const note of notes) console.log(`  ok  ${note}`)
   if (failures.length === 0) {
-    console.log(`\nPASS  ${discovered.length} skills, all references resolve.`)
+    console.log(`\nPASS  ${discovered.length} skills, all references resolve, frontmatter is YAML-safe.`)
     process.exit(0)
   }
   console.error(`\nFAIL  ${failures.length} problem(s):`)

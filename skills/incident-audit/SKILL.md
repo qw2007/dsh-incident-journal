@@ -1,6 +1,9 @@
 ---
 name: incident-audit
-description: Use when the user asks to audit or clean up their incident journal — 审一遍笔记、找出该记没记的坑、journal 体检、哪些条目退化了 — to find entries that have rotted and incidents that were never written down.
+description: >
+  Use when the user asks to audit or clean up their incident journal —
+  审一遍笔记、找出该记没记的坑、journal 体检、哪些条目退化了 — to find entries
+  that have rotted and incidents that were never written down.
 ---
 
 # incident-audit
