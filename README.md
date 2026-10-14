@@ -2,7 +2,7 @@
 
 > 给 DeepSeek Harness 用的**工程日记**：把你踩过的坑、留下的技术点、认下的设计立场写成可复习、可审计的条目，而不是让它烂在聊天记录里。
 
-三个 skill：**记录**（`incident-journal`）、**复习**（`incident-review`）、**体检**（`incident-audit`）。
+四个 skill：**记录**（`incident-journal`）、**复习**（`incident-review`）、**体检**（`incident-audit`）、**资料**（`incident-resource`）。
 
 ---
 
@@ -28,12 +28,13 @@
 
 ---
 
-## 三个 skill
+## 四个 skill
 
 | skill | 触发时机 | 干什么 |
 |---|---|---|
 | `incident-journal` | 「开始记录」/「停止记录」/「落盘」，或刚发生一件值得留的事 | 检查开关，判断够格，按骨架写条目并同步**四处**索引 |
 | `incident-review` | 「考考我」「复习」 | 从库里挑 5–8 条出题，按 kind 换角度考，优先考最可能忘的 |
+| `incident-resource` | `/incident-resource <文件>`、「把这份面经收进资料」 | 先要出处（要不到就拒收），查重后加厚或新建 `资料/<slug>.md`，更新 `资料/README.md` 索引，最后只报不改地指出它和哪些条目对得上 |
 | `incident-audit` | 「审一遍笔记」 | 扫全库找退化：索引断链或编号没人声明、缺反事实、`[资料]` 被写成事实、位置不可校验、同一判据反复出现、三类失衡、该记没记 |
 
 ---
@@ -42,11 +43,11 @@
 
 ### 方式 A：零安装（推荐先试）
 
-skill 就是普通目录。把本仓库 `skills/` 下的三个目录复制到 Harness 的用户技能目录：
+skill 就是普通目录。把本仓库 `skills/` 下的四个目录复制到 Harness 的用户技能目录：
 
 ```bash
 mkdir -p ~/.dsh/skills
-cp -r skills/incident-journal skills/incident-review skills/incident-audit ~/.dsh/skills/
+cp -r skills/incident-journal skills/incident-review skills/incident-audit skills/incident-resource ~/.dsh/skills/
 ```
 
 DSH 的 filesystem skill provider 会自动发现 `~/.dsh/skills/<name>/SKILL.md`，**不需要装插件、不需要重启**（改 `SKILL.md` 会热重载）。
@@ -55,7 +56,7 @@ Windows 对应目录：`C:\Users\<你>\.dsh\skills\`。
 
 ### 方式 B：作为插件包（会真正「注入」到 profile）
 
-方式 A 是「DSH 自己去技能目录里发现」，方式 B 是「这个包自己把三个 skill 注册进 `ctx.skills`」。后者的意义是**分发**：换台机器装一次这个包，三个 skill 一起到位，不用逐个目录复制。
+方式 A 是「DSH 自己去技能目录里发现」，方式 B 是「这个包自己把四个 skill 注册进 `ctx.skills`」。后者的意义是**分发**：换台机器装一次这个包，四个 skill 一起到位，不用逐个目录复制。
 
 先把仓库放到本地：
 
@@ -71,8 +72,8 @@ git clone git@github.com:qw2007/dsh-incident-journal.git   # 私有仓库，需�
 
 | 文件 | 作用 |
 |---|---|
-| `lib/index.js` | Cordis provider：`name = 'dsh-incident-journal'`、`inject = ['skills']`，在 `apply(ctx)` 里调 `ctx.skills.registerProvider()`，把 `skills/` 下的三个 `SKILL.md` 交给 `ctx.skills`；返回的 `resourceBase` 是目录形式，所以 `SKILL.md` 里可以用相对路径引用 `references/…` |
-| `dsh.plugin.json` | 插件清单：`contributes.skills` 列出三个技能名，`engines.dsh` 声明最低版本 |
+| `lib/index.js` | Cordis provider：`name = 'dsh-incident-journal'`、`inject = ['skills']`，在 `apply(ctx)` 里调 `ctx.skills.registerProvider()`，把 `skills/` 下的四个 `SKILL.md` 交给 `ctx.skills`；返回的 `resourceBase` 是目录形式，所以 `SKILL.md` 里可以用相对路径引用 `references/…` |
+| `dsh.plugin.json` | 插件清单：`contributes.skills` 列出四个技能名，`engines.dsh` 声明最低版本 |
 | `cordis.patch.yml` | 一行 loader 配置（`insert: [{ id, name }]`）—— `install_bundle` 把它并进 profile 的 composition |
 
 代价，按会不会影响你的程度排序：每个 `plugin_manager` 动作都要一次授权；改动影响该 profile 下**所有**会话；启动期 profile 要重启一次才生效。**只想自己用就走方式 A**，这些代价一个都不会遇到。
@@ -111,7 +112,7 @@ mkdir -p my-journal/资料 my-journal/{技术点,思想风格} my-journal/my-pro
 
 ```
 my-journal/
-  资料/                        外部参考资料（面经、文档）
+  资料/                        外部参考资料（面经、文档）—— 用 `/incident-resource` 收进来
   技术点/                      跨项目共享 —— 跟人走
   思想风格/                    跨项目共享 —— 跟人走
   my-project/

@@ -2,7 +2,7 @@
 
 > An **engineering journal** for the DeepSeek Harness: write down the mistakes you actually made, the techniques worth keeping, and the design stances you committed to — in a form you will re-read and get quizzed on, instead of letting them rot in a chat log.
 
-Three skills: **journal** (`incident-journal`), **review** (`incident-review`), **audit** (`incident-audit`).
+Four skills: **journal** (`incident-journal`), **review** (`incident-review`), **audit** (`incident-audit`), **reference** (`incident-resource`).
 
 ---
 
@@ -28,12 +28,13 @@ Plus a **transferability** bar: if a lesson only applies to that one error messa
 
 ---
 
-## The three skills
+## The four skills
 
 | skill | fires when | does |
 |---|---|---|
 | `incident-journal` | "start recording" / "stop recording" / "flush", or something worth keeping just happened | checks the switch, judges whether it qualifies, writes the entry and syncs all **four** indexes |
 | `incident-review` | "quiz me" | picks 5–8 entries, questions each kind differently, prioritising what you are most likely to have forgotten |
+| `incident-resource` | `/incident-resource <file>`, "keep this interview write-up" | demands provenance (refuses without it), dedupes by source then thickens or creates `资料/<slug>.md`, updates the `资料/README.md` index, and finally reports which entries it matches without editing them |
 | `incident-audit` | "audit my journal" | scans for rot: broken or undeclared indexes, missing counterfactuals, `[资料]` written as fact, unverifiable locations, one criterion repeated across entries, three-kind imbalance, incidents never recorded |
 
 ---
@@ -42,18 +43,18 @@ Plus a **transferability** bar: if a lesson only applies to that one error messa
 
 ### Option A — no install
 
-A skill is just a directory. Copy the three skill directories into your Harness user skill dir:
+A skill is just a directory. Copy the four skill directories into your Harness user skill dir:
 
 ```bash
 mkdir -p ~/.dsh/skills
-cp -r skills/incident-journal skills/incident-review skills/incident-audit ~/.dsh/skills/
+cp -r skills/incident-journal skills/incident-review skills/incident-audit skills/incident-resource ~/.dsh/skills/
 ```
 
 The DSH filesystem skill provider discovers `~/.dsh/skills/<name>/SKILL.md` automatically — **no plugin, no restart** (edits hot-reload).
 
 ### Option B — as a plugin package (this is what actually injects)
 
-Option A is "DSH discovers the skills in your skill dir". Option B is "the package registers its three skills into `ctx.skills` itself". The point of B is **distribution**: install the package once on a new machine and all three skills arrive together, with no per-directory copying.
+Option A is "DSH discovers the skills in your skill dir". Option B is "the package registers its four skills into `ctx.skills` itself". The point of B is **distribution**: install the package once on a new machine and all four skills arrive together, with no per-directory copying.
 
 Get the repo onto the machine first:
 
@@ -69,8 +70,8 @@ What the three files do once installed:
 
 | File | Role |
 |---|---|
-| `lib/index.js` | The Cordis provider: `name = 'dsh-incident-journal'`, `inject = ['skills']`; inside `apply(ctx)` it calls `ctx.skills.registerProvider()` and hands the three `SKILL.md` files under `skills/` to `ctx.skills`. The `resourceBase` it returns is a directory, which is why a skill body can reference `references/…` by relative path. |
-| `dsh.plugin.json` | The plugin manifest: `contributes.skills` lists the three skill names, `engines.dsh` declares the minimum version. |
+| `lib/index.js` | The Cordis provider: `name = 'dsh-incident-journal'`, `inject = ['skills']`; inside `apply(ctx)` it calls `ctx.skills.registerProvider()` and hands the four `SKILL.md` files under `skills/` to `ctx.skills`. The `resourceBase` it returns is a directory, which is why a skill body can reference `references/…` by relative path. |
+| `dsh.plugin.json` | The plugin manifest: `contributes.skills` lists the four skill names, `engines.dsh` declares the minimum version. |
 | `cordis.patch.yml` | One loader row (`insert: [{ id, name }]`) — `install_bundle` merges it into the profile's composition. |
 
 The costs, ordered by how likely they are to affect you: every `plugin_manager` action needs its own approval; the change affects **every** session in that profile; a startup profile needs one restart. **If this is only for you, use Option A** and you meet none of them.
@@ -109,7 +110,7 @@ mkdir -p my-journal/资料 my-journal/{技术点,思想风格} my-journal/my-pro
 
 ```
 my-journal/
-  资料/                        external reference material (interview notes, docs)
+  资料/                        external reference material (interview notes, docs) — ingested with `/incident-resource`
   技术点/                      shared across projects — travels with you
   思想风格/                    shared across projects — travels with you
   my-project/

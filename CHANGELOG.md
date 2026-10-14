@@ -8,6 +8,7 @@ All notable changes to this package. Format follows
 
 ### Added
 
+- **A fourth skill: `incident-resource`.** The journal had a `资料/` directory for second-hand material and no way to put anything into it — `incident-journal` only reads that directory while looking for a quotation to attach to an entry. The new skill takes a file (or pasted text), **refuses it when the source cannot be named**, dedupes by source and thickens rather than duplicating, writes `资料/<slug>.md` copying the original wording instead of paraphrasing it, updates the `资料/README.md` index, and finally reports which existing entries its keywords match — without editing any of them. Invoked as `/incident-resource <file>` or by asking in words. It is a peer of the other three and needs no new code: the provider already hands every directory under `skills/` to `ctx.skills`.
 - **The `of-NNNN` declaration rule is now in both READMEs.** The four indexes
   cite entries by number, so the number has to be declared inside the entry
   file — either on the identity line (one entry per file) or in a `## of-NNNN`
