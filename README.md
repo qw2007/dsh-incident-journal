@@ -77,6 +77,16 @@ git clone git@github.com:qw2007/dsh-incident-journal.git   # 私有仓库，需�
 
 代价，按会不会影响你的程度排序：每个 `plugin_manager` 动作都要一次授权；改动影响该 profile 下**所有**会话；启动期 profile 要重启一次才生效。**只想自己用就走方式 A**，这些代价一个都不会遇到。
 
+**如果你同时留着方式 A 的副本，副本会赢。** skill 注册表把候选按 rank **升序**排序后取同名里的第一个（`dsh-skill/lib/index.js:519` 的 `compareIndexedCandidates`，用在 `:314-322`），所以**数字越小优先级越高**：
+
+```
+项目目录 100/200  <  运行时 250  <  自定义目录 300
+     <  ~/.dsh/skills 400  <  ~/.agents/skills 500
+     <  本包 550  <  dsh 自带 600
+```
+
+也就是说，装了这个包之后，`~/.dsh/skills/incident-journal` 仍然是生效的那个，包里那份被**静默忽略**，只在日志里留一行 `skill "incident-journal" from custom ignored because a higher-priority skill already exists`。这条分层是有意的：**你自己的副本 > 第三方包 > dsh 自带**。所以**用方式 B 就不要再复制 `skills/`**。
+
 > 尚未发布到 npm。现在发上去只会固化一个还会改的形态 —— 而且仓库还是私有的，`github:` 依赖也得先配凭据，所以方式 B 目前是 clone 下来装。
 
 自检（不需要装任何东西）：

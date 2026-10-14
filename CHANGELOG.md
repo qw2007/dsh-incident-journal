@@ -18,6 +18,13 @@ All notable changes to this package. Format follows
   directory to `plugin_manager`'s `install_bundle`, and leave the profile files
   to that action; plus what `lib/index.js`, `dsh.plugin.json` and
   `cordis.patch.yml` each do, and what installing costs.
+- **Both READMEs now state which copy actually wins when A and B coexist.** The
+  registry sorts candidates by rank ascending and keeps the first of each name,
+  so a *smaller* rank wins: user copies (`~/.dsh/skills`, rank 400) outrank a
+  packaged provider (550), which outranks dsh's bundled skills (600). Installing
+  the bundle while keeping the Option A copies therefore leaves the copies in
+  effect and the packaged ones silently ignored, with one warning line in the
+  log. Documented so the two options are not mistaken for additive.
 
 ### Fixed
 

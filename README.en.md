@@ -75,6 +75,16 @@ What the three files do once installed:
 
 The costs, ordered by how likely they are to affect you: every `plugin_manager` action needs its own approval; the change affects **every** session in that profile; a startup profile needs one restart. **If this is only for you, use Option A** and you meet none of them.
 
+**If you still have the Option A copies, the copies win.** The registry sorts candidates by rank **ascending** and keeps the first of each name (`dsh-skill/lib/index.js:519` `compareIndexedCandidates`, applied at `:314-322`), so a **smaller number means higher precedence**:
+
+```
+project dirs 100/200  <  runtime 250  <  custom dirs 300
+     <  ~/.dsh/skills 400  <  ~/.agents/skills 500
+     <  this package 550  <  dsh's own bundled 600
+```
+
+So after installing this package, `~/.dsh/skills/incident-journal` is still the one in effect; the packaged copy is **silently ignored**, leaving one log line: `skill "incident-journal" from custom ignored because a higher-priority skill already exists`. That layering is deliberate — **your own copies outrank a third-party package, which outranks what dsh ships**. So **if you use Option B, stop copying `skills/`**.
+
 > Not published to npm yet. Publishing now would only freeze a shape that is still moving — and the repo is private, so a `github:` dependency would need credentials anyway. Option B currently means cloning and installing.
 
 Self-check, no dependencies required:
