@@ -6,7 +6,32 @@ All notable changes to this package. Format follows
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **The `of-NNNN` declaration rule is now in both READMEs.** The four indexes
+  cite entries by number, so the number has to be declared inside the entry
+  file — either on the identity line (one entry per file) or in a `## of-NNNN`
+  section (several entries per file).
+- **Option B now documents what actually injects, and how.** The old text told
+  you to hand-edit the profile's `package.json` and install from there — which
+  is exactly what this harness forbids. It now says to clone the repo, hand the
+  directory to `plugin_manager`'s `install_bundle`, and leave the profile files
+  to that action; plus what `lib/index.js`, `dsh.plugin.json` and
+  `cordis.patch.yml` each do, and what installing costs.
+
+### Fixed
+
+- **`dsh.plugin.json` was left at 0.1.0.** Its `version` and `description` had
+  not moved with `package.json` since 0.2.0, so an installed copy advertised a
+  release that no longer existed.
+- **Both READMEs contradicted themselves on the index count.** The skill table
+  said `incident-journal` syncs three indexes while the usage section said
+  four. Four is correct: root `README.md`, `career.log`, `REVIEW.md`, and the
+  project view.
+- **The audit example carried a stale `[断链]` / `[broken]` line** — the
+  pre-0.2.0 wording ("no entry defines it") instead of the current one
+  ("neither the identity line nor a `## of-NNNN` section declares it") — and
+  omitted `[重复]` / `[duplicate]` entirely.
 
 ## [0.2.0] — 2026-10-13
 

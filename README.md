@@ -32,9 +32,9 @@
 
 | skill | 触发时机 | 干什么 |
 |---|---|---|
-| `incident-journal` | 「开始记录」/「停止记录」/「落盘」，或刚发生一件值得留的事 | 检查开关，判断够格，按骨架写条目并同步三处索引 |
+| `incident-journal` | 「开始记录」/「停止记录」/「落盘」，或刚发生一件值得留的事 | 检查开关，判断够格，按骨架写条目并同步**四处**索引 |
 | `incident-review` | 「考考我」「复习」 | 从库里挑 5–8 条出题，按 kind 换角度考，优先考最可能忘的 |
-| `incident-audit` | 「审一遍笔记」 | 扫全库找退化：索引断链、缺反事实、`[资料]` 被写成事实、位置不可校验、三类失衡、该记没记 |
+| `incident-audit` | 「审一遍笔记」 | 扫全库找退化：索引断链或编号没人声明、缺反事实、`[资料]` 被写成事实、位置不可校验、同一判据反复出现、三类失衡、该记没记 |
 
 ---
 
@@ -53,21 +53,31 @@ DSH 的 filesystem skill provider 会自动发现 `~/.dsh/skills/<name>/SKILL.md
 
 Windows 对应目录：`C:\Users\<你>\.dsh\skills\`。
 
-### 方式 B：作为插件包
+### 方式 B：作为插件包（会真正「注入」到 profile）
 
-本包自带一个 Cordis provider（`lib/index.js`），会把 `skills/` 注册进 `ctx.skills`。在 Harness profile 的 `package.json` 里加依赖：
+方式 A 是「DSH 自己去技能目录里发现」，方式 B 是「这个包自己把三个 skill 注册进 `ctx.skills`」。后者的意义是**分发**：换台机器装一次这个包，三个 skill 一起到位，不用逐个目录复制。
 
-```json
-{
-  "dependencies": {
-    "dsh-incident-journal": "github:qw2007/dsh-incident-journal"
-  }
-}
+先把仓库放到本地：
+
+```bash
+git clone git@github.com:qw2007/dsh-incident-journal.git   # 私有仓库，需要凭据
 ```
 
-然后在 profile 目录安装。包内 `cordis.patch.yml` 会把插件挂成一行 loader 配置。
+然后让 Agent 把这个目录装进当前 profile —— 用 `plugin_manager` 的 `install_bundle`，`target` 传**这个目录的绝对路径**。
 
-> 尚未发布到 npm。等接口稳定后再说 —— 现在发上去只会固化一个还会改的形态。
+> **不要手改 profile 的 `package.json` 或 `cordis.patch.yml`。** 那两步由 `install_bundle` 完成；手写的每一处都要单独授权，而且很容易写漂。你只需要给它一个目录。
+
+装进去的三个文件各自干什么：
+
+| 文件 | 作用 |
+|---|---|
+| `lib/index.js` | Cordis provider：`name = 'dsh-incident-journal'`、`inject = ['skills']`，在 `apply(ctx)` 里调 `ctx.skills.registerProvider()`，把 `skills/` 下的三个 `SKILL.md` 交给 `ctx.skills`；返回的 `resourceBase` 是目录形式，所以 `SKILL.md` 里可以用相对路径引用 `references/…` |
+| `dsh.plugin.json` | 插件清单：`contributes.skills` 列出三个技能名，`engines.dsh` 声明最低版本 |
+| `cordis.patch.yml` | 一行 loader 配置（`insert: [{ id, name }]`）—— `install_bundle` 把它并进 profile 的 composition |
+
+代价，按会不会影响你的程度排序：每个 `plugin_manager` 动作都要一次授权；改动影响该 profile 下**所有**会话；启动期 profile 要重启一次才生效。**只想自己用就走方式 A**，这些代价一个都不会遇到。
+
+> 尚未发布到 npm。现在发上去只会固化一个还会改的形态 —— 而且仓库还是私有的，`github:` 依赖也得先配凭据，所以方式 B 目前是 clone 下来装。
 
 自检（不需要装任何东西）：
 
@@ -75,7 +85,7 @@ Windows 对应目录：`C:\Users\<你>\.dsh\skills\`。
 node scripts/verify-provider.mjs
 ```
 
-它会走一遍 `list()` / `get()`，并检查每个 `SKILL.md` 里用反引号引用的 `references/...` 路径是否真的存在。
+它会走一遍 `list()` / `get()`，并检查每个 `SKILL.md` 里用反引号引用的 `references/...` 路径是否真的存在，外加一条：frontmatter 是不是 YAML 安全的。单行 `description:` 里出现 `": "` 会让宿主**静默丢弃**整个技能 —— 这个坑真踩过，所以现在有机器检查。
 
 ---
 
@@ -138,6 +148,13 @@ active_workspaces:
 
 边界：补到**需要改标题**就该新建，那已经不是原来那件事了。`坑` 在三个以上项目反复出现就不再是坑，`incident-audit` 会提示把它提成一条技术点或思想风格。
 
+**条目编号 `of-NNNN` 必须声明在条目文件里。** 四处索引按编号引用条目，所以编号不能只活在索引里。合法位置只有两个：
+
+- **一个文件一个条目** —— 写在身份行上：`` `kind: 坑` · `of-0007` · `status: 需复习` ``；
+- **一个文件多个条目** —— 每个条目一个 `## of-NNNN <子标题>` 小节，身份行不写编号。
+
+两处都没有、却被索引引用的，`incident-audit` 报 `[断链]`。
+
 ### 3. 复习
 
 跟 Agent 说「考考我」。它会挑 5–8 条出题，**按 kind 换角度**：
@@ -157,11 +174,12 @@ active_workspaces:
 跟 Agent 说「审一遍笔记」。输出形如：
 
 ```
-[断链]   career.log:18 引用 of-0007，但没有任何条目定义它
+[断链]   career.log:18 引用 of-0007，但身份行和 `## of-0007` 小节里都没有声明它
 [悬空]   项目视图 my-project/README.md 指向 技术点/xxx.md，该文件不存在
 [流水账] 坑/foo.md 缺「我原来以为」；技术点/bar.md 说不出不用会怎样
 [污染]   技术点/baz.md 把 [资料] 写成了事实
 [退化]   坑/qux.md 只写了行号没写符号名
+[重复]   同一条判据在 坑/a.md、坑/b.md、坑/c.md 各写了一遍 → 更像是骨架的 bug，不是三次独立的收获
 [提升]   坑/jwt-expiry-a.md、坑/jwt-expiry-b.md 分属两个项目、同一判据 → 建议提成一条 技术点
 [失衡]   库里有 9 条坑、0 条技术点、0 条思想风格
 [缺记]   commit abc1234 (revert: ...) 没有对应条目

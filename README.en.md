@@ -32,9 +32,9 @@ Plus a **transferability** bar: if a lesson only applies to that one error messa
 
 | skill | fires when | does |
 |---|---|---|
-| `incident-journal` | "start recording" / "stop recording" / "flush", or something worth keeping just happened | checks the switch, judges whether it qualifies, writes the entry and syncs all three indexes |
+| `incident-journal` | "start recording" / "stop recording" / "flush", or something worth keeping just happened | checks the switch, judges whether it qualifies, writes the entry and syncs all **four** indexes |
 | `incident-review` | "quiz me" | picks 5–8 entries, questions each kind differently, prioritising what you are most likely to have forgotten |
-| `incident-audit` | "audit my journal" | scans for rot: broken indexes, missing counterfactuals, `[资料]` written as fact, unverifiable locations, three-kind imbalance, incidents never recorded |
+| `incident-audit` | "audit my journal" | scans for rot: broken or undeclared indexes, missing counterfactuals, `[资料]` written as fact, unverifiable locations, one criterion repeated across entries, three-kind imbalance, incidents never recorded |
 
 ---
 
@@ -51,21 +51,31 @@ cp -r skills/incident-journal skills/incident-review skills/incident-audit ~/.ds
 
 The DSH filesystem skill provider discovers `~/.dsh/skills/<name>/SKILL.md` automatically — **no plugin, no restart** (edits hot-reload).
 
-### Option B — as a plugin package
+### Option B — as a plugin package (this is what actually injects)
 
-This package ships a Cordis provider (`lib/index.js`) that registers `skills/` into `ctx.skills`. Add it to your Harness profile's `package.json`:
+Option A is "DSH discovers the skills in your skill dir". Option B is "the package registers its three skills into `ctx.skills` itself". The point of B is **distribution**: install the package once on a new machine and all three skills arrive together, with no per-directory copying.
 
-```json
-{
-  "dependencies": {
-    "dsh-incident-journal": "github:qw2007/dsh-incident-journal"
-  }
-}
+Get the repo onto the machine first:
+
+```bash
+git clone git@github.com:qw2007/dsh-incident-journal.git   # private repo, needs credentials
 ```
 
-The bundled `cordis.patch.yml` mounts it as one loader row.
+Then have the agent install that directory into the current profile — `plugin_manager` with `action: install_bundle` and the directory's **absolute path** as `target`.
 
-> Not published to npm yet. Publishing now would only freeze a shape that is still moving.
+> **Do not hand-edit the profile's `package.json` or `cordis.patch.yml`.** `install_bundle` performs those steps; every hand-made write needs its own approval and drifts easily. All it wants from you is a directory.
+
+What the three files do once installed:
+
+| File | Role |
+|---|---|
+| `lib/index.js` | The Cordis provider: `name = 'dsh-incident-journal'`, `inject = ['skills']`; inside `apply(ctx)` it calls `ctx.skills.registerProvider()` and hands the three `SKILL.md` files under `skills/` to `ctx.skills`. The `resourceBase` it returns is a directory, which is why a skill body can reference `references/…` by relative path. |
+| `dsh.plugin.json` | The plugin manifest: `contributes.skills` lists the three skill names, `engines.dsh` declares the minimum version. |
+| `cordis.patch.yml` | One loader row (`insert: [{ id, name }]`) — `install_bundle` merges it into the profile's composition. |
+
+The costs, ordered by how likely they are to affect you: every `plugin_manager` action needs its own approval; the change affects **every** session in that profile; a startup profile needs one restart. **If this is only for you, use Option A** and you meet none of them.
+
+> Not published to npm yet. Publishing now would only freeze a shape that is still moving — and the repo is private, so a `github:` dependency would need credentials anyway. Option B currently means cloning and installing.
 
 Self-check, no dependencies required:
 
@@ -73,7 +83,7 @@ Self-check, no dependencies required:
 node scripts/verify-provider.mjs
 ```
 
-It drives `list()` / `get()` and verifies every `references/...` path mentioned in a `SKILL.md` body actually exists on disk.
+It drives `list()` / `get()`, verifies every `references/...` path mentioned in a `SKILL.md` body actually exists on disk, and checks one more thing: that the frontmatter is YAML-safe. A `": "` inside a single-line `description:` makes the host **silently drop** the whole skill — that one was hit for real, which is why a machine now checks it.
 
 ---
 
@@ -136,6 +146,13 @@ Ask the agent to record what you just hit. It:
 
 Boundary: once thickening would require **changing the title**, it is no longer the same thing — create a new entry. A `坑` recurring across three or more projects has stopped being a `坑`, and the audit will propose promoting it into a single `技术点` or `思想风格`.
 
+**The `of-NNNN` number must be declared inside the entry file.** The four indexes cite entries by number, so a number living only in an index points at nothing. There are exactly two legal places:
+
+- **one entry per file** — on the identity line: `` `kind: 坑` · `of-0007` · `status: 需复习` ``;
+- **several entries per file** — one `## of-NNNN <subtitle>` section each, with no number on the identity line.
+
+A number that appears in neither place while an index cites it is reported as `[broken]`.
+
 ### 3. Review
 
 Ask to be quizzed. 5–8 questions, each kind quizzed differently:
@@ -155,11 +172,12 @@ Answers fold behind `<details>`, and the round is appended to `REVIEW.md` with c
 Ask for an audit. One line per finding, sorted by severity:
 
 ```
-[broken]  career.log:18 cites of-0007, but no entry defines it
+[broken]   career.log:18 cites of-0007, but neither the identity line nor a `## of-0007` section declares it
 [dangling] project view my-project/README.md points at 技术点/xxx.md, which does not exist
 [log]     坑/foo.md has no "what I believed"; 技术点/bar.md cannot say what goes wrong without it
 [pollute] 技术点/baz.md writes a [资料] claim as fact
 [stale]   坑/qux.md gives a line number but no symbol name
+[duplicate] one criterion is written out in 坑/a.md, 坑/b.md and 坑/c.md → more likely a skeleton bug than three separate findings
 [promote] 坑/jwt-expiry-a.md and 坑/jwt-expiry-b.md sit in two projects under one criterion → promote to a single 技术点
 [skew]    9 entries in 坑, 0 in 技术点, 0 in 思想风格
 [missed]  commit abc1234 (revert: ...) has no entry
