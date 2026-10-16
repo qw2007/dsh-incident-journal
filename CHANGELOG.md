@@ -29,6 +29,9 @@ All notable changes to this package. Format follows
 
 ### Fixed
 
+- **`incident-resource` wrote straight into the library root while `incident-journal` staged first.** Both write the same library, so the two skills disagreed about how: the journal kept its writes inside the workspace and flushed once, the resource paid one escalation per file. The resource now stages `资料/<slug>.md` — and the `资料/README.md` row it adds — the same way, and the staging directory is documented as a **shadow of the library**: same relative paths, so the flush needs no mapping.
+- **The flush was named everywhere and written down nowhere.** The journal's `SKILL.md` and both READMEs promised entries "land in `.incident-journal-staging/` and are flushed in one batch" without ever saying what the batch was, so the promise could not be kept. `SKILL.md` now carries the command — one recursive `Copy-Item`, one `Remove-Item`, one read-back listing the library — and states the fact it rests on: **approvals are charged per call, not per file** (measured: one escalated call moved a three-file tree, subdirectory included).
+- **`.gitignore` did not cover the staging directory**, although the skills create it in the user's workspace and it sits there between sessions. It now ignores `.incident-journal-staging/` next to the existing local-journal entries.
 - **`dsh.plugin.json` was left at 0.1.0.** Its `version` and `description` had
   not moved with `package.json` since 0.2.0, so an installed copy advertised a
   release that no longer existed.

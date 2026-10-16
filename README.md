@@ -146,7 +146,7 @@ active_workspaces:
 5. 按 [`skills/incident-journal/references/skeleton.md`](skills/incident-journal/references/skeleton.md) 的骨架落一条；
 6. 同步**四处**索引（根 `README.md` / `career.log` / `REVIEW.md` / `<项目名>/README.md`）。
 
-**库在工作区之外时**，条目先写到 `<工作区>/.incident-journal-staging/`，你说「**落盘**」时批量搬过去 —— 一次授权，而不是每个文件一次。
+**库在工作区之外时**，条目先写到 `<工作区>/.incident-journal-staging/`，你说「**落盘**」时一次搬完 —— 暂存目录是库根的影子，相对路径一一对应，**授权按调用计、不按文件计**，所以搬 20 个和搬 1 个一样贵。要动的索引也先复制进暂存目录里改好，落盘时随条目一起盖回去。
 
 **加厚最容易失效，所以它被写成了一个硬动作。** 不先 grep，你就只有想起来「我记过」的时候才会去加厚 —— 而想得起来的时候，你本来就不需要这条规则。
 

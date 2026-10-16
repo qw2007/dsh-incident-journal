@@ -45,7 +45,7 @@ description: >
 
 ## 第三步：写材料文件
 
-`<库根>/资料/<slug>.md`。slug 用小写英文或拼音 + 连字符，**不用中文文件名**。
+落点是 `<库根>/资料/<slug>.md`（**实际写进暂存目录，见下**）。slug 用小写英文或拼音 + 连字符，**不用中文文件名**。
 
 ```markdown
 # <材料标题>
@@ -65,9 +65,22 @@ description: >
 
 **照抄，不要润色。** 润色是这里唯一不可逆的污染：改过语气的二手材料，以后没人分得清哪句是原作者说的、哪句是我加的。
 
+**落到 `<工作区>/.incident-journal-staging/资料/<slug>.md`，不要直接写库根。** 库根在工作区之外，写一个文件就要一次越权批准；暂存目录在工作区内，写多少都免费。暂存目录是**库根的影子**（路径与库根里的相对路径一一对应），用户说「落盘」时一次搬完 —— **授权按调用计、不按文件计**，所以永远是一条命令，不是每文件一次：
+
+```powershell
+$stage = '<工作区>\.incident-journal-staging'
+$root  = '<库根>'
+Copy-Item -Path (Join-Path $stage '*') -Destination $root -Recurse -Force
+Remove-Item -LiteralPath $stage -Recurse -Force
+'--- 库根现在有什么 ---'
+Get-ChildItem -LiteralPath $root -Recurse -File | ForEach-Object { $_.FullName }
+```
+
+**回读再收工**：最后一段列出来的东西里要能看到刚搬过去的材料，看不到就是没落。（`incident-journal` 的 `## 落盘` 说的是同一条命令。）
+
 ## 第四步：更新索引
 
-`<库根>/资料/README.md` 的表格加一行：
+`<库根>/资料/README.md` 的表格加一行 —— **改的是暂存目录里的那一份**，先把读到的 `<库根>/资料/README.md` 复制进 `<工作区>/.incident-journal-staging/资料/README.md` 再改（读库根不需要批准）：
 
 ```
 | <材料标题> | [<slug>.md](<slug>.md) | <来源简写> | <YYYY-MM-DD> |

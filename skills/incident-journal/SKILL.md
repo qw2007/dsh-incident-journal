@@ -80,7 +80,21 @@ active_workspaces:
 
 写之前，拿条目的关键词 grep 一遍 `<库根>/资料/`；命中就在条目里加 `## 与资料的关联` 一节。
 
-**写到 `<工作区>/.incident-journal-staging/`，不要直接写库根。** 库根在工作区之外，每写一个文件都要一次越权批准；暂存目录在工作区内，一次会话结束时 flush 一次即可。
+**写到 `<工作区>/.incident-journal-staging/`，不要直接写库根。** 库根在工作区之外，每写一个文件都要一次越权批准；暂存目录在工作区内，写多少都是免费的，落盘时一次搬完。
+
+暂存目录是**库根的影子**：只装这次要动的文件，路径与它在库根里的相对路径**完全一致**。
+
+```
+<工作区>/.incident-journal-staging/技术点/xxx.md
+<工作区>/.incident-journal-staging/<项目名>/坑/yyy.md
+<工作区>/.incident-journal-staging/README.md          # 这次要改的索引
+```
+
+摆好路径，落盘时就不用做任何映射 —— 一条递归复制各归各位。
+
+**索引也这么改**：要动 `<库根>/README.md` / `career.log` / `REVIEW.md` / `<项目名>/README.md`，先把读到的它复制进暂存目录（**读库根不需要批准**），在暂存目录里改好，落盘时随条目一起盖回去。
+
+工作区是 git 仓库、又有 `.gitignore`，顺手把 `.incident-journal-staging/` 追加进去 —— 工作区内写入，同样免费。
 
 ## 第五步：同步四处索引
 
@@ -92,6 +106,25 @@ active_workspaces:
 - `<库根>/<项目名>/README.md` 加一行 —— 技术点 / 思想风格按 `projects:` 标签聚合，链回一级目录
 
 最后一处是**项目视图**：进到 `<项目名>/` 就能看全这个项目的三类条目。它只存链接、不存内容，所以指的东西永远是唯一的那份正文，不会出现「指针和正文不一致」。
+
+## 落盘
+
+用户说「落盘」，就是**一次越权批准把暂存树整个盖回库根**，然后删掉暂存目录。
+
+**授权按调用计，不按文件计。** 一条命令搬 1 个文件和搬 20 个文件一样贵 —— 所以落盘永远是一条命令，不是一个文件一次。
+
+```powershell
+$stage = '<工作区>\.incident-journal-staging'
+$root  = '<库根>'
+Copy-Item -Path (Join-Path $stage '*') -Destination $root -Recurse -Force
+Remove-Item -LiteralPath $stage -Recurse -Force
+'--- 库根现在有什么 ---'
+Get-ChildItem -LiteralPath $root -Recurse -File | ForEach-Object { $_.FullName }
+```
+
+`-Force` 会覆盖从暂存目录带过去的那些索引文件，缺失的目录也会一并建出来。
+
+**回读再收工。** 上面最后一段把库根的文件列出来，落盘完要能在里面看到刚搬过去的东西；看不到就是没落，别报「已落盘」。
 
 ## 库的固定布局
 

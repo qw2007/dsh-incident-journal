@@ -144,7 +144,7 @@ Ask the agent to record what you just hit. It:
 5. writes the entry following [`skills/incident-journal/references/skeleton.md`](skills/incident-journal/references/skeleton.md);
 6. syncs **four** indexes (root `README.md` / `career.log` / `REVIEW.md` / `<project>/README.md`).
 
-**When the library lives outside the workspace**, entries land in `<workspace>/.incident-journal-staging/` and are flushed in one batch when you say "**落盘**" — one approval instead of one per file.
+**When the library lives outside the workspace**, entries land in `<workspace>/.incident-journal-staging/` — a shadow of the library, same relative paths — and are flushed by a single recursive copy when you say "**落盘**". Approvals are charged per call, not per file, so one command moving twenty files costs the same as one. Index files you touch are staged the same way: copy them in, edit the copy, and the flush puts them back together with the entries.
 
 **Thickening is the rule most likely to quietly do nothing, so it is written as a hard action.** Without the grep you would only thicken when you happen to remember the earlier entry — and by then you no longer need the rule.
 

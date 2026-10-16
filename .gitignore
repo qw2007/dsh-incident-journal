@@ -18,3 +18,4 @@ dist/
 # Local journal instances — never commit a user's journal from inside this repo
 .my-journal/
 journal/
+.incident-journal-staging/
