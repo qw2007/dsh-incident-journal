@@ -63,7 +63,7 @@ Windows 对应目录：`C:\Users\<你>\.dsh\skills\`。
 | | |
 |---|---|
 | 包名 | `dsh-incident-journal` |
-| 版本 | `0.3.1`（`latest`） |
+| 版本 | `0.3.2`（`latest`） |
 | 页面 | <https://www.npmjs.com/package/dsh-incident-journal> |
 
 先在一个空目录里确认它装得出来（18 个文件，含 `skills/` 下全部 `references`）：
@@ -72,10 +72,10 @@ Windows 对应目录：`C:\Users\<你>\.dsh\skills\`。
 npm i dsh-incident-journal
 ```
 
-然后让 Agent 把它装进当前 profile —— 用 `plugin_manager` 的 `install_bundle`，`target` 传包名 `dsh-incident-journal@0.3.1`。**如果它只接受本地目录**（我实际跑通过的是 tarball 与目录两条路，直接传包名这一步还没实测），就先取 tarball 再传绝对路径：
+然后让 Agent 把它装进当前 profile —— 用 `plugin_manager` 的 `install_bundle`，`target` 传包名 `dsh-incident-journal@0.3.2`。**如果它只接受本地目录**（我实际跑通过的是 tarball 与目录两条路，直接传包名这一步还没实测），就先取 tarball 再传绝对路径：
 
 ```bash
-npm pack dsh-incident-journal@0.3.1
+npm pack dsh-incident-journal@0.3.2
 ```
 
 不用再 `git clone`：仓库是私有的，npm 上的包是公开的。

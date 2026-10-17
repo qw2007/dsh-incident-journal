@@ -61,7 +61,7 @@ The package itself has zero runtime dependencies (Node builtins only), and it is
 | | |
 |---|---|
 | package | `dsh-incident-journal` |
-| version | `0.3.1` (`latest`) |
+| version | `0.3.2` (`latest`) |
 | page | <https://www.npmjs.com/package/dsh-incident-journal> |
 
 Sanity-check it in an empty directory first (18 files, including every `references/` file under `skills/`):
@@ -70,10 +70,10 @@ Sanity-check it in an empty directory first (18 files, including every `referenc
 npm i dsh-incident-journal
 ```
 
-Then have the agent install it into the current profile — `plugin_manager` with `action: install_bundle` and the package name `dsh-incident-journal@0.3.1` as `target`. **If it only accepts a local directory** (tarball and directory are the two paths I have actually exercised; passing the package name is untested), fetch the tarball and pass its absolute path:
+Then have the agent install it into the current profile — `plugin_manager` with `action: install_bundle` and the package name `dsh-incident-journal@0.3.2` as `target`. **If it only accepts a local directory** (tarball and directory are the two paths I have actually exercised; passing the package name is untested), fetch the tarball and pass its absolute path:
 
 ```bash
-npm pack dsh-incident-journal@0.3.1
+npm pack dsh-incident-journal@0.3.2
 ```
 
 No `git clone` needed any more: the repo is private, the npm package is public.

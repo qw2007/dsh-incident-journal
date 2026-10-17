@@ -4,6 +4,19 @@ All notable changes to this package. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-10-17
+
+### Fixed
+
+- **`开始记录` finally has a definition.** The exception near the top said "just
+  do the action" for 开始记录 / 停止记录 / 落盘, but only 落盘 was ever spelled out —
+  and it was spelled out as a pure copy. A flush into a workspace that had never
+  been added to `active_workspaces` therefore produced entries with no way back
+  in: the per-round auto-check in `~/.dsh/AGENTS.md` reads only that list, so the
+  workspace could afterwards be reached only by typing `/incident-journal` by
+  hand. `开始记录` and `停止记录` now have a row of their own, and `落盘` checks the
+  list before it copies, registering the workspace first if it is missing.
+
 ## [0.3.1] - 2026-10-17
 
 ### Changed
@@ -201,7 +214,8 @@ First public cut. Three skills and the provider shim that distributes them.
 - Not published to npm.
 - Verified against DSH `0.2.0-rc.2`; declares `engines.dsh >= 0.1.0-rc.6`.
 
-[Unreleased]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/qw2007/dsh-incident-journal/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/qw2007/dsh-incident-journal/compare/v0.1.0...v0.2.0
