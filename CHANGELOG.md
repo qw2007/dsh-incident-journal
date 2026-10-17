@@ -4,20 +4,21 @@ All notable changes to this package. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.1] - 2026-10-17
 
 ### Changed
 
 - **Option B now starts at the npm registry.** `0.3.0` is published, so the
   install section no longer begins with `git clone`: it names the package, the
   version, the page, `npm i dsh-incident-journal` as a sanity check, and points
-  `install_bundle` at `dsh-incident-journal@0.3.0`. Passing the package name
-  straight to `install_bundle` is marked untested; `npm pack` stays as the
-  tarball fallback that has actually been exercised.
-- **Both READMEs now carry the tarball digest.** The old "publishing needs the
-  owner's credentials" note is replaced by `npm view dsh-incident-journal
-  dist.shasum`, which should print `fff035b852de5823a6605ed352ea6716008f039c`
-  for `0.3.0`.
+  `install_bundle` at the published version. Passing the package name straight
+  to `install_bundle` is marked untested; `npm pack` stays as the tarball
+  fallback that has actually been exercised.
+- **Both READMEs now say how to verify a tarball.** The old "publishing needs
+  the owner's credentials" note is replaced by the `npm view
+  dsh-incident-journal dist.shasum` check, compared against a local `npm pack` —
+  deliberately without a hard-coded digest, which would go stale at every
+  release.
 
 ## [0.3.0] - 2026-10-16
 
@@ -200,7 +201,8 @@ First public cut. Three skills and the provider shim that distributes them.
 - Not published to npm.
 - Verified against DSH `0.2.0-rc.2`; declares `engines.dsh >= 0.1.0-rc.6`.
 
-[Unreleased]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/qw2007/dsh-incident-journal/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/qw2007/dsh-incident-journal/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/qw2007/dsh-incident-journal/releases/tag/v0.1.0

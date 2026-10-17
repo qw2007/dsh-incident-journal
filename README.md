@@ -63,7 +63,7 @@ Windows 对应目录：`C:\Users\<你>\.dsh\skills\`。
 | | |
 |---|---|
 | 包名 | `dsh-incident-journal` |
-| 版本 | `0.3.0`（`latest`） |
+| 版本 | `0.3.1`（`latest`） |
 | 页面 | <https://www.npmjs.com/package/dsh-incident-journal> |
 
 先在一个空目录里确认它装得出来（18 个文件，含 `skills/` 下全部 `references`）：
@@ -72,10 +72,10 @@ Windows 对应目录：`C:\Users\<你>\.dsh\skills\`。
 npm i dsh-incident-journal
 ```
 
-然后让 Agent 把它装进当前 profile —— 用 `plugin_manager` 的 `install_bundle`，`target` 传包名 `dsh-incident-journal@0.3.0`。**如果它只接受本地目录**（我实际跑通过的是 tarball 与目录两条路，直接传包名这一步还没实测），就先取 tarball 再传绝对路径：
+然后让 Agent 把它装进当前 profile —— 用 `plugin_manager` 的 `install_bundle`，`target` 传包名 `dsh-incident-journal@0.3.1`。**如果它只接受本地目录**（我实际跑通过的是 tarball 与目录两条路，直接传包名这一步还没实测），就先取 tarball 再传绝对路径：
 
 ```bash
-npm pack dsh-incident-journal@0.3.0
+npm pack dsh-incident-journal@0.3.1
 ```
 
 不用再 `git clone`：仓库是私有的，npm 上的包是公开的。
@@ -102,7 +102,7 @@ npm pack dsh-incident-journal@0.3.0
 
 也就是说，装了这个包之后，`~/.dsh/skills/incident-journal` 仍然是生效的那个，包里那份被**静默忽略**，只在日志里留一行 `skill "incident-journal" from custom ignored because a higher-priority skill already exists`。这条分层是有意的：**你自己的副本 > 第三方包 > dsh 自带**。所以**用方式 B 就不要再复制 `skills/`**。
 
-> 想核对包没被篡改：`npm view dsh-incident-journal dist.shasum` 应当是 `fff035b852de5823a6605ed352ea6716008f039c`（`0.3.0` 的 tarball SHA-1）。
+> 想核对包没被篡改：`npm view dsh-incident-journal dist.shasum` 会打印当前版本的 tarball SHA-1，和本地 `npm pack` 出来的 `.tgz` 对一下即可。这里不写死哈希 —— 每次发版都会变。
 
 自检（不需要装任何东西）：
 
