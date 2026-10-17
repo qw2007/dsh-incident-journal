@@ -58,13 +58,16 @@ Windows 对应目录：`C:\Users\<你>\.dsh\skills\`。
 
 方式 A 是「DSH 自己去技能目录里发现」，方式 B 是「这个包自己把四个 skill 注册进 `ctx.skills`」。后者的意义是**分发**：换台机器装一次这个包，四个 skill 一起到位，不用逐个目录复制。
 
-先把仓库放到本地：
+这个包本身零运行期依赖（只用 Node 内置模块），所以先把它拿到本机：
 
 ```bash
-git clone git@github.com:qw2007/dsh-incident-journal.git   # 私有仓库，需要凭据
+npm pack dsh-incident-journal   # 已发布到 npm 时，从 registry 取 tarball
+npm pack                        # 在仓库里，自己打一个 tarball
+# 或者
+git clone git@github.com:qw2007/dsh-incident-journal.git
 ```
 
-然后让 Agent 把这个目录装进当前 profile —— 用 `plugin_manager` 的 `install_bundle`，`target` 传**这个目录的绝对路径**。
+然后让 Agent 把它装进当前 profile —— 用 `plugin_manager` 的 `install_bundle`，`target` 传 **tarball 或仓库目录的绝对路径**（发布后也可以直接传包名 `dsh-incident-journal@0.3.0`）。
 
 > **不要手改 profile 的 `package.json` 或 `cordis.patch.yml`。** 那两步由 `install_bundle` 完成；手写的每一处都要单独授权，而且很容易写漂。你只需要给它一个目录。
 
@@ -88,7 +91,7 @@ git clone git@github.com:qw2007/dsh-incident-journal.git   # 私有仓库，需�
 
 也就是说，装了这个包之后，`~/.dsh/skills/incident-journal` 仍然是生效的那个，包里那份被**静默忽略**，只在日志里留一行 `skill "incident-journal" from custom ignored because a higher-priority skill already exists`。这条分层是有意的：**你自己的副本 > 第三方包 > dsh 自带**。所以**用方式 B 就不要再复制 `skills/`**。
 
-> 尚未发布到 npm。现在发上去只会固化一个还会改的形态 —— 而且仓库还是私有的，`github:` 依赖也得先配凭据，所以方式 B 目前是 clone 下来装。
+> 发布到公共 npm 需要仓库主的凭据，所以那一步由仓库主执行；在那之前，方式 B 用 tarball 或目录安装，效果与此后从 registry 装完全一样。
 
 自检（不需要装任何东西）：
 
@@ -256,7 +259,7 @@ Agent 答对一次不等于你掌握了。`status` 的修改权只在本人手�
 ## 兼容性
 
 - DSH `>=0.1.0-rc.6`（开发与验证在 `0.2.0-rc.2` 上）
-- 方式 A 无任何依赖；方式 B 需要 `@deepseek-ai/cordis ^4.0.1`（peer）
+- 方式 A 无任何依赖；方式 B 也没有运行期依赖（只用 Node 内置模块）
 - 平台无关。skill 正文里不含任何写死的绝对路径或平台专有命令 —— 那是这类库腐化最快的地方。
 
 ## License

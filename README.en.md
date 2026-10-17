@@ -56,13 +56,15 @@ The DSH filesystem skill provider discovers `~/.dsh/skills/<name>/SKILL.md` auto
 
 Option A is "DSH discovers the skills in your skill dir". Option B is "the package registers its four skills into `ctx.skills` itself". The point of B is **distribution**: install the package once on a new machine and all four skills arrive together, with no per-directory copying.
 
-Get the repo onto the machine first:
+The package itself has zero runtime dependencies (Node builtins only), so fetch it onto the machine first:
 
 ```bash
-git clone git@github.com:qw2007/dsh-incident-journal.git   # private repo, needs credentials
+npm pack dsh-incident-journal   # from the registry, once published
+npm pack                        # inside the repo, to build your own tarball
+git clone git@github.com:qw2007/dsh-incident-journal.git
 ```
 
-Then have the agent install that directory into the current profile — `plugin_manager` with `action: install_bundle` and the directory's **absolute path** as `target`.
+Then have the agent install it into the current profile — `plugin_manager` with `action: install_bundle` and the **absolute path** of the tarball or repo directory as `target` (once published, the package name `dsh-incident-journal@0.3.0` works too).
 
 > **Do not hand-edit the profile's `package.json` or `cordis.patch.yml`.** `install_bundle` performs those steps; every hand-made write needs its own approval and drifts easily. All it wants from you is a directory.
 
@@ -86,7 +88,7 @@ project dirs 100/200  <  runtime 250  <  custom dirs 300
 
 So after installing this package, `~/.dsh/skills/incident-journal` is still the one in effect; the packaged copy is **silently ignored**, leaving one log line: `skill "incident-journal" from custom ignored because a higher-priority skill already exists`. That layering is deliberate — **your own copies outrank a third-party package, which outranks what dsh ships**. So **if you use Option B, stop copying `skills/`**.
 
-> Not published to npm yet. Publishing now would only freeze a shape that is still moving — and the repo is private, so a `github:` dependency would need credentials anyway. Option B currently means cloning and installing.
+> Publishing to the public npm registry needs the repo owner's credentials, so that step is the owner's to run. Until then, install Option B from a tarball or a directory — the result is identical to installing from the registry later.
 
 Self-check, no dependencies required:
 
@@ -252,7 +254,7 @@ It used to be four configurable keys (`entries` / `index` / `timeline` / `review
 ## Compatibility
 
 - DSH `>=0.1.0-rc.6` (developed and verified on `0.2.0-rc.2`)
-- Option A has no dependencies; Option B needs `@deepseek-ai/cordis ^4.0.1` (peer)
+- Option A has no dependencies; Option B has no runtime dependencies either (Node builtins only)
 - Platform-independent: no hardcoded absolute paths or platform-specific commands in any skill body.
 
 ## License

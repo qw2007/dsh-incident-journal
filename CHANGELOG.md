@@ -4,7 +4,7 @@ All notable changes to this package. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] - 2026-10-16
 
 ### Added
 
@@ -26,6 +26,21 @@ All notable changes to this package. Format follows
   the bundle while keeping the Option A copies therefore leaves the copies in
   effect and the packaged ones silently ignored, with one warning line in the
   log. Documented so the two options are not mistaken for additive.
+
+- **The package is publishable as a plain npm package.** `peerDependencies`
+  named `@deepseek-ai/cordis` while `lib/index.js` imports nothing but node
+  builtins — an install gate that bought nothing, and would have blocked
+  installation the day cordis crossed a major. It is gone; the package now has
+  no runtime and no peer dependencies. `files` gained `CHANGELOG.md` and
+  `NOTICE` (the latter carries the upstream MIT attribution), `prepublishOnly`
+  runs the provider self-check, and `0.3.0` is the same number in
+  `package.json` and `dsh.plugin.json`.
+- **The flush now mentions unpushed work.** The library is usually a git
+  repository, and the flush left it dirty and unpushed without saying so. After
+  the read-back the skill runs one `git -C <library> status -sb` and adds one
+  sentence when there are unpushed commits or uncommitted changes. It fires
+  only while the skill is invoked, and says so — nothing watches the library
+  between entries.
 
 ### Fixed
 
@@ -167,6 +182,7 @@ First public cut. Three skills and the provider shim that distributes them.
 - Not published to npm.
 - Verified against DSH `0.2.0-rc.2`; declares `engines.dsh >= 0.1.0-rc.6`.
 
-[Unreleased]: https://github.com/qw2007/dsh-incident-journal/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/qw2007/dsh-incident-journal/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/qw2007/dsh-incident-journal/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/qw2007/dsh-incident-journal/releases/tag/v0.1.0
