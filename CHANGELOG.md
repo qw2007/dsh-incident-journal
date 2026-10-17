@@ -4,7 +4,25 @@ All notable changes to this package. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Option B now starts at the npm registry.** `0.3.0` is published, so the
+  install section no longer begins with `git clone`: it names the package, the
+  version, the page, `npm i dsh-incident-journal` as a sanity check, and points
+  `install_bundle` at `dsh-incident-journal@0.3.0`. Passing the package name
+  straight to `install_bundle` is marked untested; `npm pack` stays as the
+  tarball fallback that has actually been exercised.
+- **Both READMEs now carry the tarball digest.** The old "publishing needs the
+  owner's credentials" note is replaced by `npm view dsh-incident-journal
+  dist.shasum`, which should print `fff035b852de5823a6605ed352ea6716008f039c`
+  for `0.3.0`.
+
 ## [0.3.0] - 2026-10-16
+
+**Published to the public npm registry as `dsh-incident-journal@0.3.0`**
+(tarball SHA-1 `fff035b852de5823a6605ed352ea6716008f039c`).
 
 ### Added
 

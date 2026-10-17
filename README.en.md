@@ -56,15 +56,27 @@ The DSH filesystem skill provider discovers `~/.dsh/skills/<name>/SKILL.md` auto
 
 Option A is "DSH discovers the skills in your skill dir". Option B is "the package registers its four skills into `ctx.skills` itself". The point of B is **distribution**: install the package once on a new machine and all four skills arrive together, with no per-directory copying.
 
-The package itself has zero runtime dependencies (Node builtins only), so fetch it onto the machine first:
+The package itself has zero runtime dependencies (Node builtins only), and it is **published on the public npm registry**:
+
+| | |
+|---|---|
+| package | `dsh-incident-journal` |
+| version | `0.3.0` (`latest`) |
+| page | <https://www.npmjs.com/package/dsh-incident-journal> |
+
+Sanity-check it in an empty directory first (18 files, including every `references/` file under `skills/`):
 
 ```bash
-npm pack dsh-incident-journal   # from the registry, once published
-npm pack                        # inside the repo, to build your own tarball
-git clone git@github.com:qw2007/dsh-incident-journal.git
+npm i dsh-incident-journal
 ```
 
-Then have the agent install it into the current profile — `plugin_manager` with `action: install_bundle` and the **absolute path** of the tarball or repo directory as `target` (once published, the package name `dsh-incident-journal@0.3.0` works too).
+Then have the agent install it into the current profile — `plugin_manager` with `action: install_bundle` and the package name `dsh-incident-journal@0.3.0` as `target`. **If it only accepts a local directory** (tarball and directory are the two paths I have actually exercised; passing the package name is untested), fetch the tarball and pass its absolute path:
+
+```bash
+npm pack dsh-incident-journal@0.3.0
+```
+
+No `git clone` needed any more: the repo is private, the npm package is public.
 
 > **Do not hand-edit the profile's `package.json` or `cordis.patch.yml`.** `install_bundle` performs those steps; every hand-made write needs its own approval and drifts easily. All it wants from you is a directory.
 
@@ -88,7 +100,7 @@ project dirs 100/200  <  runtime 250  <  custom dirs 300
 
 So after installing this package, `~/.dsh/skills/incident-journal` is still the one in effect; the packaged copy is **silently ignored**, leaving one log line: `skill "incident-journal" from custom ignored because a higher-priority skill already exists`. That layering is deliberate — **your own copies outrank a third-party package, which outranks what dsh ships**. So **if you use Option B, stop copying `skills/`**.
 
-> Publishing to the public npm registry needs the repo owner's credentials, so that step is the owner's to run. Until then, install Option B from a tarball or a directory — the result is identical to installing from the registry later.
+> To check the package has not been tampered with: `npm view dsh-incident-journal dist.shasum` should be `fff035b852de5823a6605ed352ea6716008f039c` (the tarball SHA-1 of `0.3.0`).
 
 Self-check, no dependencies required:
 

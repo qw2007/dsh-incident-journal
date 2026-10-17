@@ -58,16 +58,27 @@ Windows 对应目录：`C:\Users\<你>\.dsh\skills\`。
 
 方式 A 是「DSH 自己去技能目录里发现」，方式 B 是「这个包自己把四个 skill 注册进 `ctx.skills`」。后者的意义是**分发**：换台机器装一次这个包，四个 skill 一起到位，不用逐个目录复制。
 
-这个包本身零运行期依赖（只用 Node 内置模块），所以先把它拿到本机：
+这个包本身零运行期依赖（只用 Node 内置模块），**已发布到公共 npm**：
+
+| | |
+|---|---|
+| 包名 | `dsh-incident-journal` |
+| 版本 | `0.3.0`（`latest`） |
+| 页面 | <https://www.npmjs.com/package/dsh-incident-journal> |
+
+先在一个空目录里确认它装得出来（18 个文件，含 `skills/` 下全部 `references`）：
 
 ```bash
-npm pack dsh-incident-journal   # 已发布到 npm 时，从 registry 取 tarball
-npm pack                        # 在仓库里，自己打一个 tarball
-# 或者
-git clone git@github.com:qw2007/dsh-incident-journal.git
+npm i dsh-incident-journal
 ```
 
-然后让 Agent 把它装进当前 profile —— 用 `plugin_manager` 的 `install_bundle`，`target` 传 **tarball 或仓库目录的绝对路径**（发布后也可以直接传包名 `dsh-incident-journal@0.3.0`）。
+然后让 Agent 把它装进当前 profile —— 用 `plugin_manager` 的 `install_bundle`，`target` 传包名 `dsh-incident-journal@0.3.0`。**如果它只接受本地目录**（我实际跑通过的是 tarball 与目录两条路，直接传包名这一步还没实测），就先取 tarball 再传绝对路径：
+
+```bash
+npm pack dsh-incident-journal@0.3.0
+```
+
+不用再 `git clone`：仓库是私有的，npm 上的包是公开的。
 
 > **不要手改 profile 的 `package.json` 或 `cordis.patch.yml`。** 那两步由 `install_bundle` 完成；手写的每一处都要单独授权，而且很容易写漂。你只需要给它一个目录。
 
@@ -91,7 +102,7 @@ git clone git@github.com:qw2007/dsh-incident-journal.git
 
 也就是说，装了这个包之后，`~/.dsh/skills/incident-journal` 仍然是生效的那个，包里那份被**静默忽略**，只在日志里留一行 `skill "incident-journal" from custom ignored because a higher-priority skill already exists`。这条分层是有意的：**你自己的副本 > 第三方包 > dsh 自带**。所以**用方式 B 就不要再复制 `skills/`**。
 
-> 发布到公共 npm 需要仓库主的凭据，所以那一步由仓库主执行；在那之前，方式 B 用 tarball 或目录安装，效果与此后从 registry 装完全一样。
+> 想核对包没被篡改：`npm view dsh-incident-journal dist.shasum` 应当是 `fff035b852de5823a6605ed352ea6716008f039c`（`0.3.0` 的 tarball SHA-1）。
 
 自检（不需要装任何东西）：
 
