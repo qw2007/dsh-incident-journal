@@ -61,8 +61,9 @@ The package itself has zero runtime dependencies (Node builtins only), and it is
 | | |
 |---|---|
 | package | `dsh-incident-journal` |
-| version | `0.3.2` (`latest`) |
+| dist-tag | `latest` |
 | page | <https://www.npmjs.com/package/dsh-incident-journal> |
+| source | <https://github.com/qw2007/dsh-incident-journal> |
 
 Sanity-check it in an empty directory first (18 files, including every `references/` file under `skills/`):
 
@@ -70,13 +71,13 @@ Sanity-check it in an empty directory first (18 files, including every `referenc
 npm i dsh-incident-journal
 ```
 
-Then have the agent install it into the current profile — `plugin_manager` with `action: install_bundle` and the package name `dsh-incident-journal@0.3.2` as `target`. **If it only accepts a local directory** (tarball and directory are the two paths I have actually exercised; passing the package name is untested), fetch the tarball and pass its absolute path:
+Then have the agent install it into the current profile — `plugin_manager` with `action: install_bundle` and the package name `dsh-incident-journal@latest` as `target`. **If it only accepts a local directory** (tarball and directory are the two paths I have actually exercised; passing the package name is untested), fetch the tarball and pass its absolute path:
 
 ```bash
-npm pack dsh-incident-journal@0.3.2
+npm pack dsh-incident-journal@latest
 ```
 
-No `git clone` needed any more: the repo is private, the npm package is public.
+Clone the source repo if you want to change the code — it is public now; installing it needs no clone.
 
 > **Do not hand-edit the profile's `package.json` or `cordis.patch.yml`.** `install_bundle` performs those steps; every hand-made write needs its own approval and drifts easily. All it wants from you is a directory.
 

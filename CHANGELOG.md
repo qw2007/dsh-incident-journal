@@ -4,6 +4,16 @@ All notable changes to this package. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 2026-10-17
+
+### Changed
+
+- **The repository is public.** `git clone` needs no credentials any more, and
+  the install section links to it as the source.
+- **Neither README pins a package version any more.** `latest` is what `npm i`
+  resolves anyway, and a literal version in that table went stale at every
+  release; the digest lesson from 0.3.1, applied to the version.
+
 ## [0.3.2] - 2026-10-17
 
 ### Fixed
@@ -214,7 +224,8 @@ First public cut. Three skills and the provider shim that distributes them.
 - Not published to npm.
 - Verified against DSH `0.2.0-rc.2`; declares `engines.dsh >= 0.1.0-rc.6`.
 
-[Unreleased]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/qw2007/dsh-incident-journal/compare/v0.2.0...v0.3.0

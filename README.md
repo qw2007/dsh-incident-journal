@@ -63,8 +63,9 @@ Windows 对应目录：`C:\Users\<你>\.dsh\skills\`。
 | | |
 |---|---|
 | 包名 | `dsh-incident-journal` |
-| 版本 | `0.3.2`（`latest`） |
+| dist-tag | `latest` |
 | 页面 | <https://www.npmjs.com/package/dsh-incident-journal> |
+| 源码 | <https://github.com/qw2007/dsh-incident-journal> |
 
 先在一个空目录里确认它装得出来（18 个文件，含 `skills/` 下全部 `references`）：
 
@@ -72,13 +73,13 @@ Windows 对应目录：`C:\Users\<你>\.dsh\skills\`。
 npm i dsh-incident-journal
 ```
 
-然后让 Agent 把它装进当前 profile —— 用 `plugin_manager` 的 `install_bundle`，`target` 传包名 `dsh-incident-journal@0.3.2`。**如果它只接受本地目录**（我实际跑通过的是 tarball 与目录两条路，直接传包名这一步还没实测），就先取 tarball 再传绝对路径：
+然后让 Agent 把它装进当前 profile —— 用 `plugin_manager` 的 `install_bundle`，`target` 传包名 `dsh-incident-journal@latest`。**如果它只接受本地目录**（我实际跑通过的是 tarball 与目录两条路，直接传包名这一步还没实测），就先取 tarball 再传绝对路径：
 
 ```bash
-npm pack dsh-incident-journal@0.3.2
+npm pack dsh-incident-journal@latest
 ```
 
-不用再 `git clone`：仓库是私有的，npm 上的包是公开的。
+要改代码就 `git clone` 那个源码仓库 —— 它现在是公开的；只是装来用则完全不需要。
 
 > **不要手改 profile 的 `package.json` 或 `cordis.patch.yml`。** 那两步由 `install_bundle` 完成；手写的每一处都要单独授权，而且很容易写漂。你只需要给它一个目录。
 
