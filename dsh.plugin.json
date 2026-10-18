@@ -1,7 +1,7 @@
 {
   "id": "qw2007/dsh-incident-journal",
   "name": "Incident Journal",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "Durable, reviewable engineering incident journals for the DeepSeek Harness — capture, quiz, and audit your own mistakes.",
   "main": "./lib/index.js",
   "engines": {
@@ -13,7 +13,8 @@
       "incident-journal",
       "incident-review",
       "incident-resource",
-      "incident-audit"
+      "incident-audit",
+      "incident-layout"
     ]
   }
 }

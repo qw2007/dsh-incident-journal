@@ -4,6 +4,24 @@ All notable changes to this package. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-10-17
+
+### Added
+
+- **A fifth skill: `incident-layout`.** The library's four directory names were
+  hard-coded inside every skill body, so renaming one meant editing five files
+  and breaking every link. It now renames a directory for real: `git mv` across
+  the library, an override recorded in `<root>/.layout.yml`, every reference in
+  the library rewritten, and a grep for leftovers afterwards. Bare invocation
+  reports the current layout and changes nothing.
+- **Directory names are resolved, not literal.** The skill bodies now write paths
+  as `<坑>` / `<技术点>` / `<思想风格>` / `<资料>` and state once where the real
+  name comes from. `kind: 坑` is a label and never changes — only the folder it
+  lands in does.
+- **The override lives inside the library** (`<root>/.layout.yml`), not in
+  `~/.dsh/incident-journal.yml`: it describes the library, so a `git clone` on a
+  new machine has to keep the names.
+
 ## [0.3.3] - 2026-10-17
 
 ### Changed
@@ -224,7 +242,8 @@ First public cut. Three skills and the provider shim that distributes them.
 - Not published to npm.
 - Verified against DSH `0.2.0-rc.2`; declares `engines.dsh >= 0.1.0-rc.6`.
 
-[Unreleased]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.3...HEAD
+[Unreleased]: https://github.com/qw2007/dsh-incident-journal/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.3...v0.4.0
 [0.3.3]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/qw2007/dsh-incident-journal/compare/v0.3.0...v0.3.1

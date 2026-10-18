@@ -49,7 +49,13 @@ check(captured.name === 'incident-journal', `provider name is "${captured.name}"
 
 const candidates = await captured.list({})
 const discovered = candidates.map((c) => c.name).sort()
-const expected = ['incident-audit', 'incident-journal', 'incident-resource', 'incident-review']
+const expected = [
+  'incident-audit',
+  'incident-journal',
+  'incident-layout',
+  'incident-resource',
+  'incident-review'
+]
 
 check(
   JSON.stringify(discovered) === JSON.stringify(expected),

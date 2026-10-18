@@ -2,7 +2,7 @@
 
 > 给 DeepSeek Harness 用的**工程日记**：把你踩过的坑、留下的技术点、认下的设计立场写成可复习、可审计的条目，而不是让它烂在聊天记录里。
 
-四个 skill：**记录**（`incident-journal`）、**复习**（`incident-review`）、**体检**（`incident-audit`）、**资料**（`incident-resource`）。
+五个 skill：**记录**（`incident-journal`）、**复习**（`incident-review`）、**体检**（`incident-audit`）、**资料**（`incident-resource`）、**布局**（`incident-layout`）。
 
 ---
 
@@ -28,7 +28,7 @@
 
 ---
 
-## 四个 skill
+## 五个 skill
 
 | skill | 触发时机 | 干什么 |
 |---|---|---|
@@ -36,6 +36,7 @@
 | `incident-review` | 「考考我」「复习」 | 从库里挑 5–8 条出题，按 kind 换角度考，优先考最可能忘的 |
 | `incident-resource` | `/incident-resource <文件>`、「把这份面经收进资料」 | 先要出处（要不到就拒收），查重后加厚或新建 `资料/<slug>.md`，更新 `资料/README.md` 索引，最后只报不改地指出它和哪些条目对得上 |
 | `incident-audit` | 「审一遍笔记」 | 扫全库找退化：索引断链或编号没人声明、缺反事实、`[资料]` 被写成事实、位置不可校验、同一判据反复出现、三类失衡、该记没记 |
+| `incident-layout` | 「把坑改名成 trouble」「目录叫什么我自己定」 | 改库里的目录名：动目录（`git mv`）、写 `<库根>/.layout.yml` 覆盖表、把库里所有引用一起改掉；不带参数时只报当前布局 |
 
 ---
 
@@ -43,11 +44,11 @@
 
 ### 方式 A：零安装（推荐先试）
 
-skill 就是普通目录。把本仓库 `skills/` 下的四个目录复制到 Harness 的用户技能目录：
+skill 就是普通目录。把本仓库 `skills/` 下的五个目录复制到 Harness 的用户技能目录：
 
 ```bash
 mkdir -p ~/.dsh/skills
-cp -r skills/incident-journal skills/incident-review skills/incident-audit skills/incident-resource ~/.dsh/skills/
+cp -r skills/incident-journal skills/incident-review skills/incident-audit skills/incident-resource skills/incident-layout ~/.dsh/skills/
 ```
 
 DSH 的 filesystem skill provider 会自动发现 `~/.dsh/skills/<name>/SKILL.md`，**不需要装插件、不需要重启**（改 `SKILL.md` 会热重载）。
@@ -56,7 +57,7 @@ Windows 对应目录：`C:\Users\<你>\.dsh\skills\`。
 
 ### 方式 B：作为插件包（会真正「注入」到 profile）
 
-方式 A 是「DSH 自己去技能目录里发现」，方式 B 是「这个包自己把四个 skill 注册进 `ctx.skills`」。后者的意义是**分发**：换台机器装一次这个包，四个 skill 一起到位，不用逐个目录复制。
+方式 A 是「DSH 自己去技能目录里发现」，方式 B 是「这个包自己把五个 skill 注册进 `ctx.skills`」。后者的意义是**分发**：换台机器装一次这个包，五个 skill 一起到位，不用逐个目录复制。
 
 这个包本身零运行期依赖（只用 Node 内置模块），**已发布到公共 npm**：
 
@@ -67,7 +68,7 @@ Windows 对应目录：`C:\Users\<你>\.dsh\skills\`。
 | 页面 | <https://www.npmjs.com/package/dsh-incident-journal> |
 | 源码 | <https://github.com/qw2007/dsh-incident-journal> |
 
-先在一个空目录里确认它装得出来（18 个文件，含 `skills/` 下全部 `references`）：
+先在一个空目录里确认它装得出来（19 个文件，含 `skills/` 下全部 `references`）：
 
 ```bash
 npm i dsh-incident-journal
@@ -119,7 +120,7 @@ node scripts/verify-provider.mjs
 
 ### 1. 建库、指定库、启动
 
-库的目录结构是**固定的**：
+库的默认目录结构：
 
 ```bash
 mkdir -p my-journal/资料 my-journal/{技术点,思想风格} my-journal/my-project/坑
@@ -127,6 +128,7 @@ mkdir -p my-journal/资料 my-journal/{技术点,思想风格} my-journal/my-pro
 
 ```
 my-journal/
+  .layout.yml                  目录改名后的覆盖表（可选，没改过就没有）
   资料/                        外部参考资料（面经、文档）—— 用 `/incident-resource` 收进来
   技术点/                      跨项目共享 —— 跟人走
   思想风格/                    跨项目共享 —— 跟人走
@@ -138,7 +140,9 @@ my-journal/
 
 **`坑` 跟项目走，`技术点` / `思想风格` 跟人走。** 后两类不属于任何一个项目，所以放在一级目录，靠条目里的 `projects:` 标签关联项目 —— 那是条目与项目之间唯一的关联。`<项目名>/README.md` 只存链接，让你进到项目目录就能看全三类；它不复制内容，所以不会出现「指针和正文不一致」。这个文件由写条目那一步顺带更新。
 
-没有可配的路径 —— 布局固定，所以**没有配置文件**。跟 Agent 说「**开始记录**」，它会问一次库的绝对路径（**只问这一次**），写进 `~/.dsh/incident-journal.yml`：
+**目录名可以改。** 上面这四个是默认名。说一句「把坑改成 trouble」，`incident-layout` 会把每个项目下的 `坑/` 一起改名、写 `<库根>/.layout.yml` 记下这次覆盖、再把库里所有引用一起改掉。覆盖表放在**库根里**而不是机器配置里 —— 它是库的一部分，`git clone` 到新机器名字还在。改回去就说「把 trouble 改回坑」。**别手改目录名**，链接会一起断。
+
+跟 Agent 说「**开始记录**」，它会问一次库的绝对路径（**只问这一次**），写进 `~/.dsh/incident-journal.yml`：
 
 ```yaml
 journal_root: /abs/path/to/my-journal

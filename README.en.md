@@ -2,7 +2,7 @@
 
 > An **engineering journal** for the DeepSeek Harness: write down the mistakes you actually made, the techniques worth keeping, and the design stances you committed to — in a form you will re-read and get quizzed on, instead of letting them rot in a chat log.
 
-Four skills: **journal** (`incident-journal`), **review** (`incident-review`), **audit** (`incident-audit`), **reference** (`incident-resource`).
+Five skills: **journal** (`incident-journal`), **review** (`incident-review`), **audit** (`incident-audit`), **reference** (`incident-resource`), **layout** (`incident-layout`).
 
 ---
 
@@ -28,7 +28,7 @@ Plus a **transferability** bar: if a lesson only applies to that one error messa
 
 ---
 
-## The four skills
+## The five skills
 
 | skill | fires when | does |
 |---|---|---|
@@ -36,6 +36,7 @@ Plus a **transferability** bar: if a lesson only applies to that one error messa
 | `incident-review` | "quiz me" | picks 5–8 entries, questions each kind differently, prioritising what you are most likely to have forgotten |
 | `incident-resource` | `/incident-resource <file>`, "keep this interview write-up" | demands provenance (refuses without it), dedupes by source then thickens or creates `资料/<slug>.md`, updates the `资料/README.md` index, and finally reports which entries it matches without editing them |
 | `incident-audit` | "audit my journal" | scans for rot: broken or undeclared indexes, missing counterfactuals, `[资料]` written as fact, unverifiable locations, one criterion repeated across entries, three-kind imbalance, incidents never recorded |
+| `incident-layout` | "rename 坑 to trouble", "I want to name the directories myself" | renames a layout directory: moves it (`git mv`), records the override in `<root>/.layout.yml`, rewrites every reference in the library; bare invocation just reports the current layout |
 
 ---
 
@@ -43,18 +44,18 @@ Plus a **transferability** bar: if a lesson only applies to that one error messa
 
 ### Option A — no install
 
-A skill is just a directory. Copy the four skill directories into your Harness user skill dir:
+A skill is just a directory. Copy the five skill directories into your Harness user skill dir:
 
 ```bash
 mkdir -p ~/.dsh/skills
-cp -r skills/incident-journal skills/incident-review skills/incident-audit skills/incident-resource ~/.dsh/skills/
+cp -r skills/incident-journal skills/incident-review skills/incident-audit skills/incident-resource skills/incident-layout ~/.dsh/skills/
 ```
 
 The DSH filesystem skill provider discovers `~/.dsh/skills/<name>/SKILL.md` automatically — **no plugin, no restart** (edits hot-reload).
 
 ### Option B — as a plugin package (this is what actually injects)
 
-Option A is "DSH discovers the skills in your skill dir". Option B is "the package registers its four skills into `ctx.skills` itself". The point of B is **distribution**: install the package once on a new machine and all four skills arrive together, with no per-directory copying.
+Option A is "DSH discovers the skills in your skill dir". Option B is "the package registers its five skills into `ctx.skills` itself". The point of B is **distribution**: install the package once on a new machine and all five skills arrive together, with no per-directory copying.
 
 The package itself has zero runtime dependencies (Node builtins only), and it is **published on the public npm registry**:
 
@@ -65,7 +66,7 @@ The package itself has zero runtime dependencies (Node builtins only), and it is
 | page | <https://www.npmjs.com/package/dsh-incident-journal> |
 | source | <https://github.com/qw2007/dsh-incident-journal> |
 
-Sanity-check it in an empty directory first (18 files, including every `references/` file under `skills/`):
+Sanity-check it in an empty directory first (19 files, including every `references/` file under `skills/`):
 
 ```bash
 npm i dsh-incident-journal
@@ -117,7 +118,7 @@ It drives `list()` / `get()`, verifies every `references/...` path mentioned in 
 
 ### 1. Create the library, point at it, start
 
-The layout is **fixed**:
+The default layout:
 
 ```bash
 mkdir -p my-journal/资料 my-journal/{技术点,思想风格} my-journal/my-project/坑
@@ -125,6 +126,7 @@ mkdir -p my-journal/资料 my-journal/{技术点,思想风格} my-journal/my-pro
 
 ```
 my-journal/
+  .layout.yml                  directory-name overrides (optional; absent until you rename)
   资料/                        external reference material (interview notes, docs) — ingested with `/incident-resource`
   技术点/                      shared across projects — travels with you
   思想风格/                    shared across projects — travels with you
@@ -136,7 +138,9 @@ my-journal/
 
 **`坑` travels with the project; `技术点` and `思想风格` travel with you.** The latter two belong to no single project, so they sit at the root and are tied back by the `projects:` line in each entry — that line is the only link between an entry and a project. `<project>/README.md` holds links only, so opening a project shows all three kinds at once without duplicating anything: there is no pointer to fall out of sync with the content. The write step keeps it updated.
 
-There are no configurable paths — so **there is no config file**. Ask the agent to "start recording"; it asks once for the absolute library path (**once, ever**) and writes `~/.dsh/incident-journal.yml`:
+**The directory names can change.** The four above are the defaults. Say "rename 坑 to trouble" and `incident-layout` renames every project's `坑/`, records the override in `<root>/.layout.yml`, and rewrites every reference in the library. The override file lives **inside the library**, not in machine config — it is part of the repo, so `git clone` on a new machine keeps the names. Say "rename trouble back to 坑" to undo. **Do not rename a directory by hand** — the links all break.
+
+Ask the agent to "start recording"; it asks once for the absolute library path (**once, ever**) and writes `~/.dsh/incident-journal.yml`:
 
 ```yaml
 journal_root: /abs/path/to/my-journal
