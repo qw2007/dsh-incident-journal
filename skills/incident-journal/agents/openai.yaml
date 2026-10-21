@@ -1,0 +1,4 @@
+interface:
+  display_name: "Incident Journal"
+  short_description: "Record an engineering incident, or start / stop / flush the journal"
+  default_prompt: "Use $incident-journal to record what just happened in my journal."

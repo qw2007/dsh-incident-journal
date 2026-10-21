@@ -1,0 +1,4 @@
+interface:
+  display_name: "Incident Review"
+  short_description: "Quiz me on entries I wrote but never reviewed"
+  default_prompt: "Use $incident-review to quiz me on my engineering journal."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Incident Resource"
+  short_description: "File outside material with its provenance intact"
+  default_prompt: "Use $incident-resource to file this material into my journal."

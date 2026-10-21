@@ -1,0 +1,4 @@
+interface:
+  display_name: "Incident Layout"
+  short_description: "Rename a journal directory and rewrite every reference"
+  default_prompt: "Use $incident-layout to show me the current layout of my journal."

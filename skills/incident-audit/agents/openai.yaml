@@ -1,0 +1,4 @@
+interface:
+  display_name: "Incident Audit"
+  short_description: "Find rotted entries and incidents that were never written down"
+  default_prompt: "Use $incident-audit to audit my engineering journal."
