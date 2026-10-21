@@ -242,6 +242,21 @@ That prints what the model actually sees; it should contain `- incident-journal:
 
 ---
 
+## Using it in Claude Code and compatible hosts
+
+The five skills carry only `name` and `description` in their frontmatter, which is what the [Agent Skills specification](https://agentskills.io/specification) asks for — any host that reads skill directories by that spec can use them as-is. Install by **linking**, not copying:
+
+```bash
+mkdir -p ~/.claude/skills
+for n in incident-journal incident-review incident-audit incident-resource incident-layout; do
+  ln -s "$PWD/skills/$n" ~/.claude/skills/$n
+done
+```
+
+> **Not verified on this machine** — Claude Code is not installed here. DSH is the host these were written for, Codex is the one that was measured, and this entry is derived from the spec; check the skill list yourself before relying on it. All three hosts share the same files, so there is no version drift — only a question of whether a given host reads them.
+
+---
+
 ## The five skills
 
 | skill | fires when | does |
@@ -250,7 +265,7 @@ That prints what the model actually sees; it should contain `- incident-journal:
 | `incident-review` | "quiz me" | picks 5–8 entries, questions each kind differently, prioritising what you are most likely to have forgotten |
 | `incident-resource` | `/incident-resource <file>`, "keep this interview write-up" | demands provenance (refuses without it), dedupes by source then thickens or creates `资料/<slug>.md`, updates the `资料/README.md` index, and finally reports which entries it matches without editing them |
 | `incident-audit` | "audit my journal" | scans for rot: broken or undeclared indexes, missing counterfactuals, `[资料]` written as fact, unverifiable locations, one criterion repeated across entries, three-kind imbalance, incidents never recorded |
-| `incident-layout` | "rename 坑 to trouble", "I want to name the directories myself" | renames a layout directory: moves it (`git mv`), records the override in `<root>/.layout.yml`, rewrites every reference in the library; bare invocation just reports the current layout |
+| `incident-layout` | "rename 坑 to trouble", "I want to name the directories myself" | renames a layout directory: moves it (`Move-Item` / `mv`), records the override in `<root>/.layout.yml`, rewrites every reference in the library; bare invocation just reports the current layout |
 
 ---
 
@@ -265,6 +280,8 @@ That prints what the model actually sees; it should contain `- incident-journal:
 Shared by all three: checkable evidence, a real cost, and transferability.
 
 **Explicitly rejected:** syntax errors, environment chores, standard practice copied from the internet, "best practices" with no numbers, design taste with no constraint.
+
+**Rather read a library than a rule?** [`examples/demo-journal/`](examples/demo-journal/) is a real one, excerpted: six files, nine entries, all four indexes — entry bodies untouched. Seeing what the three kinds actually look like beats reading the rules ten times.
 
 ### Three honesty rules
 

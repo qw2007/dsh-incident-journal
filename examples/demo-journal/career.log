@@ -1,0 +1,19 @@
+# career.log
+
+一行一条，只记「发生过什么」和「凭什么这么说」。感受性的东西不写在这里。
+
+格式：`日期 | 事件 | 证据`
+
+```
+2026-10-11 | 本机 TLS 后端从 schannel 改回 openssl，git HTTPS 恢复 | of-0002
+2026-10-11 | GitHub CLI 登录成功（qw2007，keyring 存 token） | of-0003
+2026-10-11 | 认定本机根本没装 PowerShell 7（进程是 powershell.exe 5.1.26100.9444），并用对照实验证实 Get-Content -Raw 按 GBK 读、Set-Content -Encoding UTF8 写 BOM | of-0008
+2026-10-15 | 定位 D2 验收看到的乱码来自 PowerShell 5.1 Invoke-RestMethod 的 Latin-1 解码，不是应用输出；验收改为「写文件 + 显式 UTF-8 读」 | of-0012 / of-0015
+2026-10-15 | 补记 D1–D3 期间的条目：4 个坑文件（of-0010–of-0014）+ 1 条技术点（of-0015）+ 1 条思想风格（of-0016） | work-as-team 36968e1
+2026-10-15 | 查出 offer 库在三个交付阶段里一条新增都没有：插件不挂宿主钩子，触发只靠模型自觉；把默认检查写进 ~/.dsh/AGENTS.md | of-0016
+2026-10-17 | 定位 kaggle CLI 的 `Authentication required` 实为 kagglesdk 刷新后写 `~/.kaggle` 被沙箱拒（`WinError 5`）；把 `USERPROFILE`/`HOME` 指进工作区后恢复 | of-0025 / of-0026
+```
+
+> 这几行直接取自真实库的 `career.log`，一字未改。因为这里只是节选：`of-0012` / `of-0025`
+> 指向的条目文件没有一起复制进来；`of-0005` / `of-0006`（过早收敛）在该库里本来就没有单独的 career 行，
+> 索引里仍然挂着它们。

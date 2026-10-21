@@ -244,6 +244,21 @@ codex debug prompt-input
 
 ---
 
+## 在 Claude Code 及兼容宿主里用
+
+五个技能的 frontmatter 只有 `name` 和 `description`，符合 [Agent Skills 规范](https://agentskills.io/specification) —— 任何按这个规范读技能目录的宿主都能直接用。装法仍然是**接目录，不是复制**：
+
+```bash
+mkdir -p ~/.claude/skills
+for n in incident-journal incident-review incident-audit incident-resource incident-layout; do
+  ln -s "$PWD/skills/$n" ~/.claude/skills/$n
+done
+```
+
+> 这一条**未在本机实测** —— 这台机器没装 Claude Code。DSH 是本体、Codex 是验过的，Claude Code 这条是按规范推的；用之前先看一眼技能列表。三处装的是同一份文件，所以不会有版本漂移，只有「这个宿主认不认」的差别。
+
+---
+
 ## 五个 skill
 
 | skill | 触发时机 | 干什么 |
@@ -252,7 +267,7 @@ codex debug prompt-input
 | `incident-review` | 「考考我」「复习」 | 从库里挑 5–8 条出题，按 kind 换角度考，优先考最可能忘的 |
 | `incident-resource` | `/incident-resource <文件>`、「把这份面经收进资料」 | 先要出处（要不到就拒收），查重后加厚或新建 `资料/<slug>.md`，更新 `资料/README.md` 索引，最后只报不改地指出它和哪些条目对得上 |
 | `incident-audit` | 「审一遍笔记」 | 扫全库找退化：索引断链或编号没人声明、缺反事实、`[资料]` 被写成事实、位置不可校验、同一判据反复出现、三类失衡、该记没记 |
-| `incident-layout` | 「把坑改名成 trouble」「目录叫什么我自己定」 | 改库里的目录名：动目录（`git mv`）、写 `<库根>/.layout.yml` 覆盖表、把库里所有引用一起改掉；不带参数时只报当前布局 |
+| `incident-layout` | 「把坑改名成 trouble」「目录叫什么我自己定」 | 改库里的目录名：动目录（`Move-Item` / `mv`）、写 `<库根>/.layout.yml` 覆盖表、把库里所有引用一起改掉；不带参数时只报当前布局 |
 
 ---
 
@@ -267,6 +282,8 @@ codex debug prompt-input
 三类共用：有可核对的证据、有代价、能迁移。
 
 **明确不收**：语法错误、环境配置琐事、网上抄来的标准做法、没有数字的「最佳实践」、只有偏好没有约束的设计品味。
+
+**不想读规则，就直接看库。** [`examples/demo-journal/`](examples/demo-journal/) 是一份从真实库里节选的示例：六份文件、九条条目、四处索引齐全，条目正文一字未改 —— 三种 kind 各长什么样，看一遍比读十遍规则快。
 
 ### 三条诚信规则
 
