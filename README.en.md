@@ -262,9 +262,9 @@ The counterfactual is the only thing standing between this and a log. Once entri
 
 **Why `status` is human-edited.** Getting a quiz question right once is not mastery.
 
-**Why the layout is fixed.**
+**Why the layout is not a general config table.**
 
-It used to be four configurable keys (`entries` / `index` / `timeline` / `review`). Since there is no second legal layout, that config was just the same defaults table copied into three skill bodies — so it was deleted, and with it a place for the three to drift apart.
+It used to be four configurable keys (`entries` / `index` / `timeline` / `review`), deleted because there is no second legal layout. What came back later was not a general config layer but an override table recording **only the keys you changed** (`.layout.yml`), living in the root of the library and travelling with it — put it in `~/.dsh/incident-journal.yml` instead and a `git clone` on a new machine loses the names.
 
 ---
 
@@ -273,6 +273,41 @@ It used to be four configurable keys (`entries` / `index` / `timeline` / `review
 - DSH `>=0.1.0-rc.6` (developed and verified on `0.2.0-rc.2`)
 - Option A has no dependencies; Option B has no runtime dependencies either (Node builtins only)
 - Platform-independent: no hardcoded absolute paths or platform-specific commands in any skill body.
+
+## Using it in Codex
+
+The five skills are plain `SKILL.md` folders, which is exactly what Codex reads — it wants `name` / `description` frontmatter and that is all these have. Install by **linking** the directory in, never by keeping a second copy on disk:
+
+```powershell
+# Windows: a junction, no admin rights needed
+$repo = 'C:\path\to\dsh-incident-journal\skills'
+foreach ($n in 'incident-journal','incident-review','incident-audit','incident-resource','incident-layout') {
+  New-Item -ItemType Junction -Path "$env:USERPROFILE\.codex\skills\$n" -Target "$repo\$n"
+}
+```
+
+```bash
+# macOS / Linux
+mkdir -p ~/.codex/skills
+for n in incident-journal incident-review incident-audit incident-resource incident-layout; do
+  ln -s "$PWD/skills/$n" ~/.codex/skills/$n
+done
+```
+
+Two things differ from DSH:
+
+- **Triggering**: Codex matches on `description`; the explicit handle is `$incident-journal`, where DSH uses `/incident-journal`.
+- **Entry copy**: `agents/openai.yaml` inside each skill directory is read only by Codex — it supplies the display name and the default prompt in its skill list.
+
+Check it on the spot:
+
+```bash
+codex debug prompt-input
+```
+
+That prints what the model actually sees; it should contain `- incident-journal: … (file: r0/incident-journal/SKILL.md)`. `~/.agents/skills` is also a path Codex reads (it shows up as `r1/…`), so either works.
+
+> Measured: all five skills appear in Codex's prompt input and the display names from `agents/openai.yaml` are read. The explicit `$incident-journal` handle was not verified on its own — automatic matching on `description` is what is confirmed.
 
 ## License
 

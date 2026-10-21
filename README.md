@@ -266,9 +266,9 @@ active_workspaces:
 
 Agent 答对一次不等于你掌握了。`status` 的修改权只在本人手里，这是刻意设计的。
 
-**为什么库的布局是固定的。**
+**为什么布局不是一张通用配置表。**
 
-之前它是四个可配的键（`entries` / `index` / `timeline` / `review`）。既然没有第二种合法布局，配置就只是三个 skill 里各抄一遍的默认值表 —— 删掉，少一处漂移。
+它曾经是四个可配的键（`entries` / `index` / `timeline` / `review`），删掉是因为没有第二种合法布局。后来要的是「目录能改名」，回来的也不是通用配置层，而是一张**只记改过的键**的覆盖表（`.layout.yml`），写在库根、跟着库走 —— 放进 `~/.dsh/incident-journal.yml` 的话，`git clone` 到新机器名字就丢了。
 
 ---
 
@@ -277,6 +277,41 @@ Agent 答对一次不等于你掌握了。`status` 的修改权只在本人手�
 - DSH `>=0.1.0-rc.6`（开发与验证在 `0.2.0-rc.2` 上）
 - 方式 A 无任何依赖；方式 B 也没有运行期依赖（只用 Node 内置模块）
 - 平台无关。skill 正文里不含任何写死的绝对路径或平台专有命令 —— 那是这类库腐化最快的地方。
+
+## 在 Codex 里用
+
+五个技能就是普通的 `SKILL.md` 目录，Codex 直接认 —— 它要的 `name` / `description` frontmatter 本来就在。装法是把目录**接**过去，不要在磁盘上放第二份：
+
+```powershell
+# Windows：junction，不需要管理员权限
+$repo = 'C:\path\to\dsh-incident-journal\skills'
+foreach ($n in 'incident-journal','incident-review','incident-audit','incident-resource','incident-layout') {
+  New-Item -ItemType Junction -Path "$env:USERPROFILE\.codex\skills\$n" -Target "$repo\$n"
+}
+```
+
+```bash
+# macOS / Linux
+mkdir -p ~/.codex/skills
+for n in incident-journal incident-review incident-audit incident-resource incident-layout; do
+  ln -s "$PWD/skills/$n" ~/.codex/skills/$n
+done
+```
+
+用法上和 DSH 有两处不同：
+
+- **触发**：靠 `description` 自动匹配；显式调用是 `$incident-journal`，而 DSH 那边是 `/incident-journal`。
+- **入口文案**：每个技能目录里的 `agents/openai.yaml` 只有 Codex 会读，提供列表里的显示名和一句默认提示词。
+
+装完可以当场验：
+
+```bash
+codex debug prompt-input
+```
+
+它打印的是模型实际看到的输入，里面应当出现 `- incident-journal: … (file: r0/incident-journal/SKILL.md)`。`~/.agents/skills` 也是 Codex 读的路径（会显示成 `r1/…`），两条都行。
+
+> 已实测：五个技能都进了 Codex 的 prompt input，`agents/openai.yaml` 的显示名也被读到。`$incident-journal` 这种显式触发没有单独验证过 —— 确认可用的是 description 自动匹配。
 
 ## License
 

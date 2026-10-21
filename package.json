@@ -1,6 +1,6 @@
 {
   "name": "dsh-incident-journal",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Durable, reviewable engineering incident journals for the DeepSeek Harness — capture, quiz, and audit your own mistakes.",
   "license": "MIT",
   "type": "module",
