@@ -28,6 +28,22 @@ Plus a **transferability** bar: if a lesson only applies to that one error messa
 
 ---
 
+## 30 seconds
+
+**You say:** "Record this — the sandbox reported `SetNamedSecurityInfoW failed (Win32 5)`, and I assumed it was a permissions problem. It wasn't."
+
+**It does** (once, and it will not ask you a second time):
+
+1. Reads the switch → this workspace is registered → continue
+2. Applies the filter → "I believed X, it turned out to be Y" holds, and the B is real → accepted
+3. Greps the whole library → not written yet → new file; already there → thicken it
+4. Writes to the skeleton → numbers tagged `[实测]`, the error text quoted verbatim (see [a real entry](examples/demo-journal/work-as-team/坑/misleading-error-messages.md))
+5. Syncs all four indexes and appends to `career.log`
+
+**What you get** is an entry you can still read in three months, where every number traces back to evidence — not a chat log.
+
+---
+
 ## Using it in DSH
 
 ### Install
