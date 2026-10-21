@@ -28,21 +28,11 @@
 
 ---
 
-## 五个 skill
+## 在 DSH 里用
 
-| skill | 触发时机 | 干什么 |
-|---|---|---|
-| `incident-journal` | 「开始记录」/「停止记录」/「落盘」，或刚发生一件值得留的事 | 检查开关，判断够格，按骨架写条目并同步**四处**索引 |
-| `incident-review` | 「考考我」「复习」 | 从库里挑 5–8 条出题，按 kind 换角度考，优先考最可能忘的 |
-| `incident-resource` | `/incident-resource <文件>`、「把这份面经收进资料」 | 先要出处（要不到就拒收），查重后加厚或新建 `资料/<slug>.md`，更新 `资料/README.md` 索引，最后只报不改地指出它和哪些条目对得上 |
-| `incident-audit` | 「审一遍笔记」 | 扫全库找退化：索引断链或编号没人声明、缺反事实、`[资料]` 被写成事实、位置不可校验、同一判据反复出现、三类失衡、该记没记 |
-| `incident-layout` | 「把坑改名成 trouble」「目录叫什么我自己定」 | 改库里的目录名：动目录（`git mv`）、写 `<库根>/.layout.yml` 覆盖表、把库里所有引用一起改掉；不带参数时只报当前布局 |
+### 安装
 
----
-
-## 安装
-
-### 方式 A：零安装（推荐先试）
+#### 方式 A：零安装（推荐先试）
 
 skill 就是普通目录。把本仓库 `skills/` 下的五个目录复制到 Harness 的用户技能目录：
 
@@ -55,7 +45,7 @@ DSH 的 filesystem skill provider 会自动发现 `~/.dsh/skills/<name>/SKILL.md
 
 Windows 对应目录：`C:\Users\<你>\.dsh\skills\`。
 
-### 方式 B：作为插件包（会真正「注入」到 profile）
+#### 方式 B：作为插件包（会真正「注入」到 profile）
 
 方式 A 是「DSH 自己去技能目录里发现」，方式 B 是「这个包自己把五个 skill 注册进 `ctx.skills`」。后者的意义是**分发**：换台机器装一次这个包，五个 skill 一起到位，不用逐个目录复制。
 
@@ -116,9 +106,9 @@ node scripts/verify-provider.mjs
 
 ---
 
-## 用起来
+### 用起来
 
-### 1. 建库、指定库、启动
+#### 1. 建库、指定库、启动
 
 库的默认目录结构：
 
@@ -154,7 +144,7 @@ active_workspaces:
 
 > **没启动的时候什么都不会记**，但也不会静默：如果那一刻本来该记，Agent 会回一句「（journal 未启动，这次没记）」。看不到这句提示，就是真的没发生值得记的事。
 
-### 2. 记一条
+#### 2. 记一条
 
 跟 Agent 说「把刚才那个坑记下来」。它会：
 
@@ -185,7 +175,7 @@ active_workspaces:
 
 两处都没有、却被索引引用的，`incident-audit` 报 `[断链]`。
 
-### 3. 复习
+#### 3. 复习
 
 跟 Agent 说「考考我」。它会挑 5–8 条出题，**按 kind 换角度**：
 
@@ -199,7 +189,7 @@ active_workspaces:
 
 **答错的条目，它会回去给那条的「追问会问什么」补一条** —— 答错说明笔记缺了这个角度，不是记性的问题。
 
-### 4. 定期体检
+#### 4. 定期体检
 
 跟 Agent 说「审一遍笔记」。输出形如：
 
@@ -214,6 +204,55 @@ active_workspaces:
 [失衡]   库里有 9 条坑、0 条技术点、0 条思想风格
 [缺记]   commit abc1234 (revert: ...) 没有对应条目
 ```
+
+---
+
+## 在 Codex 里用
+
+五个技能就是普通的 `SKILL.md` 目录，Codex 直接认 —— 它要的 `name` / `description` frontmatter 本来就在。装法是把目录**接**过去，不要在磁盘上放第二份：
+
+```powershell
+# Windows：junction，不需要管理员权限
+$repo = 'C:\path\to\dsh-incident-journal\skills'
+foreach ($n in 'incident-journal','incident-review','incident-audit','incident-resource','incident-layout') {
+  New-Item -ItemType Junction -Path "$env:USERPROFILE\.codex\skills\$n" -Target "$repo\$n"
+}
+```
+
+```bash
+# macOS / Linux
+mkdir -p ~/.codex/skills
+for n in incident-journal incident-review incident-audit incident-resource incident-layout; do
+  ln -s "$PWD/skills/$n" ~/.codex/skills/$n
+done
+```
+
+用法上和 DSH 有两处不同：
+
+- **触发**：靠 `description` 自动匹配；显式调用是 `$incident-journal`，而 DSH 那边是 `/incident-journal`。
+- **入口文案**：每个技能目录里的 `agents/openai.yaml` 只有 Codex 会读，提供列表里的显示名和一句默认提示词。
+
+装完可以当场验：
+
+```bash
+codex debug prompt-input
+```
+
+它打印的是模型实际看到的输入，里面应当出现 `- incident-journal: … (file: r0/incident-journal/SKILL.md)`。`~/.agents/skills` 也是 Codex 读的路径（会显示成 `r1/…`），两条都行。
+
+> 已实测：五个技能都进了 Codex 的 prompt input，`agents/openai.yaml` 的显示名也被读到。`$incident-journal` 这种显式触发没有单独验证过 —— 确认可用的是 description 自动匹配。
+
+---
+
+## 五个 skill
+
+| skill | 触发时机 | 干什么 |
+|---|---|---|
+| `incident-journal` | 「开始记录」/「停止记录」/「落盘」，或刚发生一件值得留的事 | 检查开关，判断够格，按骨架写条目并同步**四处**索引 |
+| `incident-review` | 「考考我」「复习」 | 从库里挑 5–8 条出题，按 kind 换角度考，优先考最可能忘的 |
+| `incident-resource` | `/incident-resource <文件>`、「把这份面经收进资料」 | 先要出处（要不到就拒收），查重后加厚或新建 `资料/<slug>.md`，更新 `资料/README.md` 索引，最后只报不改地指出它和哪些条目对得上 |
+| `incident-audit` | 「审一遍笔记」 | 扫全库找退化：索引断链或编号没人声明、缺反事实、`[资料]` 被写成事实、位置不可校验、同一判据反复出现、三类失衡、该记没记 |
+| `incident-layout` | 「把坑改名成 trouble」「目录叫什么我自己定」 | 改库里的目录名：动目录（`git mv`）、写 `<库根>/.layout.yml` 覆盖表、把库里所有引用一起改掉；不带参数时只报当前布局 |
 
 ---
 
@@ -278,40 +317,7 @@ Agent 答对一次不等于你掌握了。`status` 的修改权只在本人手�
 - 方式 A 无任何依赖；方式 B 也没有运行期依赖（只用 Node 内置模块）
 - 平台无关。skill 正文里不含任何写死的绝对路径或平台专有命令 —— 那是这类库腐化最快的地方。
 
-## 在 Codex 里用
-
-五个技能就是普通的 `SKILL.md` 目录，Codex 直接认 —— 它要的 `name` / `description` frontmatter 本来就在。装法是把目录**接**过去，不要在磁盘上放第二份：
-
-```powershell
-# Windows：junction，不需要管理员权限
-$repo = 'C:\path\to\dsh-incident-journal\skills'
-foreach ($n in 'incident-journal','incident-review','incident-audit','incident-resource','incident-layout') {
-  New-Item -ItemType Junction -Path "$env:USERPROFILE\.codex\skills\$n" -Target "$repo\$n"
-}
-```
-
-```bash
-# macOS / Linux
-mkdir -p ~/.codex/skills
-for n in incident-journal incident-review incident-audit incident-resource incident-layout; do
-  ln -s "$PWD/skills/$n" ~/.codex/skills/$n
-done
-```
-
-用法上和 DSH 有两处不同：
-
-- **触发**：靠 `description` 自动匹配；显式调用是 `$incident-journal`，而 DSH 那边是 `/incident-journal`。
-- **入口文案**：每个技能目录里的 `agents/openai.yaml` 只有 Codex 会读，提供列表里的显示名和一句默认提示词。
-
-装完可以当场验：
-
-```bash
-codex debug prompt-input
-```
-
-它打印的是模型实际看到的输入，里面应当出现 `- incident-journal: … (file: r0/incident-journal/SKILL.md)`。`~/.agents/skills` 也是 Codex 读的路径（会显示成 `r1/…`），两条都行。
-
-> 已实测：五个技能都进了 Codex 的 prompt input，`agents/openai.yaml` 的显示名也被读到。`$incident-journal` 这种显式触发没有单独验证过 —— 确认可用的是 description 自动匹配。
+---
 
 ## License
 

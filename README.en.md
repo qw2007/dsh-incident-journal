@@ -28,21 +28,11 @@ Plus a **transferability** bar: if a lesson only applies to that one error messa
 
 ---
 
-## The five skills
+## Using it in DSH
 
-| skill | fires when | does |
-|---|---|---|
-| `incident-journal` | "start recording" / "stop recording" / "flush", or something worth keeping just happened | checks the switch, judges whether it qualifies, writes the entry and syncs all **four** indexes |
-| `incident-review` | "quiz me" | picks 5–8 entries, questions each kind differently, prioritising what you are most likely to have forgotten |
-| `incident-resource` | `/incident-resource <file>`, "keep this interview write-up" | demands provenance (refuses without it), dedupes by source then thickens or creates `资料/<slug>.md`, updates the `资料/README.md` index, and finally reports which entries it matches without editing them |
-| `incident-audit` | "audit my journal" | scans for rot: broken or undeclared indexes, missing counterfactuals, `[资料]` written as fact, unverifiable locations, one criterion repeated across entries, three-kind imbalance, incidents never recorded |
-| `incident-layout` | "rename 坑 to trouble", "I want to name the directories myself" | renames a layout directory: moves it (`git mv`), records the override in `<root>/.layout.yml`, rewrites every reference in the library; bare invocation just reports the current layout |
+### Install
 
----
-
-## Install
-
-### Option A — no install
+#### Option A — no install
 
 A skill is just a directory. Copy the five skill directories into your Harness user skill dir:
 
@@ -53,7 +43,7 @@ cp -r skills/incident-journal skills/incident-review skills/incident-audit skill
 
 The DSH filesystem skill provider discovers `~/.dsh/skills/<name>/SKILL.md` automatically — **no plugin, no restart** (edits hot-reload).
 
-### Option B — as a plugin package (this is what actually injects)
+#### Option B — as a plugin package (this is what actually injects)
 
 Option A is "DSH discovers the skills in your skill dir". Option B is "the package registers its five skills into `ctx.skills` itself". The point of B is **distribution**: install the package once on a new machine and all five skills arrive together, with no per-directory copying.
 
@@ -114,9 +104,9 @@ It drives `list()` / `get()`, verifies every `references/...` path mentioned in 
 
 ---
 
-## Usage
+### Usage
 
-### 1. Create the library, point at it, start
+#### 1. Create the library, point at it, start
 
 The default layout:
 
@@ -152,7 +142,7 @@ After that you say "start recording" once per workspace, and that workspace keep
 
 > **While it is not started, nothing is recorded** — but not silently: if a moment would have qualified, the agent says one line, 「（journal 未启动，这次没记）」. No such line means nothing qualifying actually happened.
 
-### 2. Write an entry
+#### 2. Write an entry
 
 Ask the agent to record what you just hit. It:
 
@@ -183,7 +173,7 @@ Boundary: once thickening would require **changing the title**, it is no longer 
 
 A number that appears in neither place while an index cites it is reported as `[broken]`.
 
-### 3. Review
+#### 3. Review
 
 Ask to be quizzed. 5–8 questions, each kind quizzed differently:
 
@@ -197,7 +187,7 @@ Answers fold behind `<details>`, and the round is appended to `REVIEW.md` with c
 
 **Entries you get wrong earn a new line in their "follow-up questions" section** — a wrong answer means the note is missing an angle, not that your memory failed.
 
-### 4. Audit
+#### 4. Audit
 
 Ask for an audit. One line per finding, sorted by severity:
 
@@ -212,6 +202,55 @@ Ask for an audit. One line per finding, sorted by severity:
 [skew]    9 entries in 坑, 0 in 技术点, 0 in 思想风格
 [missed]  commit abc1234 (revert: ...) has no entry
 ```
+
+---
+
+## Using it in Codex
+
+The five skills are plain `SKILL.md` folders, which is exactly what Codex reads — it wants `name` / `description` frontmatter and that is all these have. Install by **linking** the directory in, never by keeping a second copy on disk:
+
+```powershell
+# Windows: a junction, no admin rights needed
+$repo = 'C:\path\to\dsh-incident-journal\skills'
+foreach ($n in 'incident-journal','incident-review','incident-audit','incident-resource','incident-layout') {
+  New-Item -ItemType Junction -Path "$env:USERPROFILE\.codex\skills\$n" -Target "$repo\$n"
+}
+```
+
+```bash
+# macOS / Linux
+mkdir -p ~/.codex/skills
+for n in incident-journal incident-review incident-audit incident-resource incident-layout; do
+  ln -s "$PWD/skills/$n" ~/.codex/skills/$n
+done
+```
+
+Two things differ from DSH:
+
+- **Triggering**: Codex matches on `description`; the explicit handle is `$incident-journal`, where DSH uses `/incident-journal`.
+- **Entry copy**: `agents/openai.yaml` inside each skill directory is read only by Codex — it supplies the display name and the default prompt in its skill list.
+
+Check it on the spot:
+
+```bash
+codex debug prompt-input
+```
+
+That prints what the model actually sees; it should contain `- incident-journal: … (file: r0/incident-journal/SKILL.md)`. `~/.agents/skills` is also a path Codex reads (it shows up as `r1/…`), so either works.
+
+> Measured: all five skills appear in Codex's prompt input and the display names from `agents/openai.yaml` are read. The explicit `$incident-journal` handle was not verified on its own — automatic matching on `description` is what is confirmed.
+
+---
+
+## The five skills
+
+| skill | fires when | does |
+|---|---|---|
+| `incident-journal` | "start recording" / "stop recording" / "flush", or something worth keeping just happened | checks the switch, judges whether it qualifies, writes the entry and syncs all **four** indexes |
+| `incident-review` | "quiz me" | picks 5–8 entries, questions each kind differently, prioritising what you are most likely to have forgotten |
+| `incident-resource` | `/incident-resource <file>`, "keep this interview write-up" | demands provenance (refuses without it), dedupes by source then thickens or creates `资料/<slug>.md`, updates the `资料/README.md` index, and finally reports which entries it matches without editing them |
+| `incident-audit` | "audit my journal" | scans for rot: broken or undeclared indexes, missing counterfactuals, `[资料]` written as fact, unverifiable locations, one criterion repeated across entries, three-kind imbalance, incidents never recorded |
+| `incident-layout` | "rename 坑 to trouble", "I want to name the directories myself" | renames a layout directory: moves it (`git mv`), records the override in `<root>/.layout.yml`, rewrites every reference in the library; bare invocation just reports the current layout |
 
 ---
 
@@ -274,40 +313,7 @@ It used to be four configurable keys (`entries` / `index` / `timeline` / `review
 - Option A has no dependencies; Option B has no runtime dependencies either (Node builtins only)
 - Platform-independent: no hardcoded absolute paths or platform-specific commands in any skill body.
 
-## Using it in Codex
-
-The five skills are plain `SKILL.md` folders, which is exactly what Codex reads — it wants `name` / `description` frontmatter and that is all these have. Install by **linking** the directory in, never by keeping a second copy on disk:
-
-```powershell
-# Windows: a junction, no admin rights needed
-$repo = 'C:\path\to\dsh-incident-journal\skills'
-foreach ($n in 'incident-journal','incident-review','incident-audit','incident-resource','incident-layout') {
-  New-Item -ItemType Junction -Path "$env:USERPROFILE\.codex\skills\$n" -Target "$repo\$n"
-}
-```
-
-```bash
-# macOS / Linux
-mkdir -p ~/.codex/skills
-for n in incident-journal incident-review incident-audit incident-resource incident-layout; do
-  ln -s "$PWD/skills/$n" ~/.codex/skills/$n
-done
-```
-
-Two things differ from DSH:
-
-- **Triggering**: Codex matches on `description`; the explicit handle is `$incident-journal`, where DSH uses `/incident-journal`.
-- **Entry copy**: `agents/openai.yaml` inside each skill directory is read only by Codex — it supplies the display name and the default prompt in its skill list.
-
-Check it on the spot:
-
-```bash
-codex debug prompt-input
-```
-
-That prints what the model actually sees; it should contain `- incident-journal: … (file: r0/incident-journal/SKILL.md)`. `~/.agents/skills` is also a path Codex reads (it shows up as `r1/…`), so either works.
-
-> Measured: all five skills appear in Codex's prompt input and the display names from `agents/openai.yaml` are read. The explicit `$incident-journal` handle was not verified on its own — automatic matching on `description` is what is confirmed.
+---
 
 ## License
 
